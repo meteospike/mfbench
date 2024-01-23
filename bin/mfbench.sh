@@ -87,7 +87,7 @@ while [[ $# -gt 0 ]]; do
     else
 
       export MFBENCH_ROOT=$PWD
-      export MFBENCH_SESSION=${1:-void}
+      export MFBENCH_SESSION=${1:-default}
 
       export MFBENCH_STORE=$MFBENCH_ROOT/.mfb
       if [ ! -d $MFBENCH_STORE ]; then
@@ -95,10 +95,10 @@ while [[ $# -gt 0 ]]; do
         mkdir $MFBENCH_STORE
       fi
 
-      if [ -f "$MFBENCH_STORE/env.default" ]; then
-        echo "Load default env values:"
-        cat $MFBENCH_STORE/env.default
-        set -a; source $MFBENCH_STORE/env.default; set +a
+      if [ -f "$MFBENCH_STORE/env.preferences" ]; then
+        echo "Load preferences for env values:"
+        cat $MFBENCH_STORE/env.preferences
+        set -a; source $MFBENCH_STORE/env.preferences; set +a
       fi
 
       for varname in $(env | fgrep MFBENCH_ | cut -d "=" -f1); do
@@ -163,13 +163,13 @@ while [[ $# -gt 0 ]]; do
       env | fgrep MFBENCH_ > $MFBENCH_STORE/env.session.$MFBENCH_SESSION
       env | fgrep OMP_    >> $MFBENCH_STORE/env.session.$MFBENCH_SESSION
 
-      \rm -f $MFBENCH_STORE/path.root
+      \rm -f $MFBENCH_STORE/path.root.$MFBENCH_SESSION
       echo "PATH=$PATH" > $MFBENCH_STORE/restore.session.$MFBENCH_SESSION
       if [[ ":$PATH:" == *":$MFBENCH_ROOT/bin:"* ]]; then
         echo "PATH already set"
       else
         PATH=$MFBENCH_ROOT/bin:$PATH
-        echo "PATH=\$MFBENCH_ROOT/bin:\$PATH" > $MFBENCH_STORE/path.root
+        echo "PATH=\$MFBENCH_ROOT/bin:\$PATH" > $MFBENCH_STORE/path.root.$MFBENCH_SESSION
       fi
 
       echo "MFBENCH_ROOT=$MFBENCH_ROOT" > $HOME/.mfb_root
@@ -200,7 +200,7 @@ while [[ $# -gt 0 ]]; do
     if [ -f $MFBENCH_ROOT/.mfb/env.session.$MFBENCH_SESSION ]; then
       set -a
       source $MFBENCH_ROOT/.mfb/env.session.$MFBENCH_SESSION
-      for filepath in $(\ls $MFBENCH_ROOT/.mfb/path.install.* $MFBENCH_ROOT/.mfb/path.root 2>/dev/null); do
+      for filepath in $(\ls $MFBENCH_ROOT/.mfb/path.install.*.$MFBENCH_SESSION $MFBENCH_ROOT/.mfb/path.root.$MFBENCH_SESSION 2>/dev/null); do
         source $filepath
       done
       set +a
@@ -212,13 +212,23 @@ while [[ $# -gt 0 ]]; do
   elif [ "$mfb" == "clear" ]; then
 
     \cd $MFBENCH_ROOT
+
     for thisdir in data/* data pack install; do
       if [ -d $thisdir ]; then
-        echo "Try to remove $thisdir"
+        echo "Try to remove $MFBENCH_ROOT/$thisdir"
         rmdir $thisdir 2>/dev/null
       elif [ -L $thisdir ]; then
+        echo "Remove link $MFBENCH_ROOT/$thisdir"
         \rm $thisdir
       fi
+    done
+
+    for file in $MFBENCH_STORE/env.session.$MFBENCH_SESSION \
+      $MFBENCH_STORE/restore.session.$MFBENCH_SESSION \
+      $MFBENCH_STORE/env.path.*.$MFBENCH_SESSION \
+      $MFBENCH_STORE/env.install.*.$MFBENCH_SESSION; do
+      echo "Remove $file"
+      \rm -f $file
     done
 
   elif [ "$mfb" == "off" ]; then
@@ -228,6 +238,7 @@ while [[ $# -gt 0 ]]; do
     for fpvar in $(env | fgrep -e MFBENCH_ -e OMP_ -e KMP_ | fgrep -v _GRIBPACK | cut -f1 -d "="); do
       unset $fpvar
     done
+
 
   elif [ "$mfb" == "root" ]; then
 
