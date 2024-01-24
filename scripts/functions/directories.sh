@@ -53,6 +53,7 @@ function mfbench_listdir_def ()
       local ichoice=0
     else
       local ichoice=$2
+      \rm -rf $partdef
     fi
     local inum=0
     local actualdef=$(\ls -l | fgrep "$partdef ->" | awk '{print $NF}')
@@ -60,7 +61,6 @@ function mfbench_listdir_def ()
       if [[ -f "$item" && "$item" != "$partdef" ]]; then
         inum=$((inum+1))
 	if [ $inum -eq $ichoice ]; then
-          \rm -rf $partdef
           \ln -s $item $partdef	  
 	  actualdef=$item
         fi

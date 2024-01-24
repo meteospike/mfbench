@@ -1,0 +1,102 @@
+tools:
+
+    perl:
+        version : '5.38.0'
+        archive : tar.gz
+
+    cmake:
+        version : '3.26.0-rc4'
+        archive : tar.gz
+
+    fypp:
+        git     : https://github.com/aradi/fypp.git
+        version : null
+
+    vimpack:
+        git     : https://github.com/pmarguinaud/vimpack.git
+        version : dotpack
+
+    yaml:
+        git     : https://github.com/yaml/pyyaml.git
+        version : null
+
+    gmkpack:
+        version : 6.9.7
+        archive : tar.gz
+
+libraries:
+
+    eccodes:
+        version : 2.30.2
+        archive : tar.gz
+
+    hdf5:
+        version : 1.10.11
+        archive : tar.bz2
+
+    netcdf-c:
+        version : 4.7.2
+        archive : tar.gz
+
+    netcdf-fortran:
+        version : 4.5.2
+        archive : tar.gz
+
+    lapack:
+        version : 3.11
+        archive : tar.gz
+
+    eigen:
+        version : 3.4.0
+        archive : tar.gz
+
+hub:
+
+    oops_src:
+        git     : https://github.com/pmarguinaud/oops.git
+        version : workaround_for_pgi_2303
+        gmkpack : 'hub/local/src/OOPS'
+
+    fiat:
+        git     : https://github.com/pmarguinaud/fiat.git
+        version : nvtx+single_prec
+        gmkpack : 'hub/local/src/Fiat'
+
+    ectrans:
+        git     : https://github.com/ACCORD-NWP/ectrans.git
+        version : mirror-CY48T3_mrg48R1.02
+        gmkpack : 'hub/local/src/Ectrans'
+
+    ecbuild:
+        git     : https://github.com/ecmwf/ecbuild.git
+        version : 3.7.0
+        gmkpack : 'hub/local/src/ecSDK'
+
+    eckit:
+        git     : https://github.com/ACCORD-NWP/eckit.git
+        version : 1.19.0
+        gmkpack : 'hub/local/src/ecSDK'
+
+    fckit:
+        git     : https://github.com/ecmwf/fckit.git
+        version : 0.9.5
+        gmkpack : 'hub/local/src/ecSDK'
+
+    field_api:
+        git     : https://github.com/ecmwf-ifs/field_api.git
+        version : v0.2.2
+        gmkpack : 'hub/local/src/FieldAPI'
+
+main:
+
+    IAL:
+        git     : https://github.com/ACCORD-NWP/IAL.git
+        version : CY49T0
+        gmkpack : 'src/local'
+
+dummy:
+
+    rgb:
+        abort   : >
+                  wdhniv_ wdugsi_ wdugln_ rgb_getparam_ rgb_gridctrl1_ rgb_sort_ rgb_modctrl_
+                  rgb_grid_ rgb_init_ rgb_gridctrl2_ rgb_dates_ wdugli_ wdhlis_  wdhdat_ wdhech_
