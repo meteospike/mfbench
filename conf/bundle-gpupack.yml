@@ -2,11 +2,9 @@ tools:
 
     perl:
         version : '5.38.0'
-        archive : tar.gz
 
     cmake:
         version : '3.26.0-rc4'
-        archive : tar.gz
 
     fypp:
         git     : https://github.com/aradi/fypp.git
@@ -22,13 +20,12 @@ tools:
 
     gmkpack:
         version : 6.9.7
-        archive : tar.gz
+        topdir  : 'gmkpack.6.9.7'
 
 libraries:
 
     eccodes:
         version : 2.30.2
-        archive : tar.gz
 
     hdf5:
         version : 1.10.11
@@ -36,19 +33,15 @@ libraries:
 
     netcdf-c:
         version : 4.7.2
-        archive : tar.gz
 
     netcdf-fortran:
         version : 4.5.2
-        archive : tar.gz
 
     lapack:
         version : 3.11
-        archive : tar.gz
 
     eigen:
         version : 3.4.0
-        archive : tar.gz
 
 hub:
 

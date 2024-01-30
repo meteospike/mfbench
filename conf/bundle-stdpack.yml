@@ -2,11 +2,9 @@ tools:
 
     perl:
         version : '5.38.0'
-        archive : tar.gz
 
     cmake:
         version : '3.26.0-rc4'
-        archive : tar.gz
 
     fypp:
         git     : https://github.com/aradi/fypp.git
@@ -21,34 +19,31 @@ tools:
         version : null
 
     gmkpack:
-        version : 6.9.7
-        archive : tar.gz
+        version : '6.9.7'
+        topdir  : gmkpack.6.9.7
+        archive : tgz
 
 libraries:
 
     eccodes:
-        version : 2.30.2
-        archive : tar.gz
+        version : '2.30.2'
+        topdir  : eccodes-2.30.2-Source
 
     hdf5:
-        version : 1.10.11
+        version : '1.10.11'
         archive : tar.bz2
 
     netcdf-c:
-        version : 4.7.2
-        archive : tar.gz
+        version : '4.7.2'
 
     netcdf-fortran:
-        version : 4.5.2
-        archive : tar.gz
+        version : '4.5.2'
 
     lapack:
-        version : 3.11
-        archive : tar.gz
+        version : '3.11'
 
     eigen:
-        version : 3.4.0
-        archive : tar.gz
+        version : '3.4.0'
 
 hub:
 
@@ -90,13 +85,8 @@ hub:
 main:
 
     IAL:
-        git     : https://github.com/ACCORD-NWP/IAL.git
-        version : CY49T0
+        version : 49t0_rapslite.09
+        archive : tgz
         gmkpack : 'src/local'
 
 dummy:
-
-    rgb:
-        abort   : >
-                  wdhniv_ wdugsi_ wdugln_ rgb_getparam_ rgb_gridctrl1_ rgb_sort_ rgb_modctrl_
-                  rgb_grid_ rgb_init_ rgb_gridctrl2_ rgb_dates_ wdugli_ wdhlis_  wdhdat_ wdhech_

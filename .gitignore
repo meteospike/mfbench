@@ -1,5 +1,8 @@
 # MFB specifics
 .mfb/
+build/
+data/
+install/
 sources/
 *-DEFAULT
 

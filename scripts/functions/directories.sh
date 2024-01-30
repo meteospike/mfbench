@@ -43,8 +43,8 @@ function mfbench_listdir_def ()
 {
   local partdir=$(dirname $1)
   local partsub=$(basename $1)
-  local partdef="${partsub^^}-DEFAULT"
-  local dirkind="MFBENCH_${partdir^^}"
+  local partdef="${partsub^^}-SELECT.$MFBENCH_PROFILE"
+  local dirkind=$(echo "MFBENCH_${partdir^^}" | tr [/] [_])
   local dirfull=${!dirkind}
   if [ -d "$dirfull" ]; then
     \cd $dirfull
@@ -60,9 +60,9 @@ function mfbench_listdir_def ()
     for item in $(\ls -1 $partsub*); do
       if [[ -f "$item" && "$item" != "$partdef" ]]; then
         inum=$((inum+1))
-	if [ $inum -eq $ichoice ]; then
+	    if [ $inum -eq $ichoice ]; then
           \ln -s $item $partdef	  
-	  actualdef=$item
+	      actualdef=$item
         fi
         local cstar=" "
         if [ "$item" == "$actualdef" ]; then

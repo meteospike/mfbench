@@ -14,7 +14,7 @@ parser = argparse.ArgumentParser(
     description = 'Inspect default or specified bundle file use to build mfbench'
 )
 
-parser.add_argument('--file', default='BUNDLE-DEFAULT')
+parser.add_argument('--file', default='BUNDLE-SELECT.'+os.environ.get('MFBENCH_PROFILE', 'default'))
 parser.add_argument('--item', default=None)
 parser.add_argument('--conf', action='store_true')
 parser.add_argument('--list', action='store_true')
@@ -40,22 +40,34 @@ else:
             bdle_flat.extend(bdle_dict[bdle_type].keys())
         if opts.item:
             if bdle_dict[bdle_type] and opts.item in bdle_dict[bdle_type]:
+                if bdle_type == 'tools':
+                    print('MFBENCH_INSTALL_MKARCH=no')
+                else:
+                    print('MFBENCH_INSTALL_MKARCH=yes')
                 this_bdle = bdle_dict[bdle_type][opts.item]
                 print(f'MFBENCH_INSTALL_NAME={opts.item}')
                 print(f'MFBENCH_INSTALL_TYPE={bdle_type}')
+                actual_threads  = this_bdle.get('threads', '4')
+                print(f'MFBENCH_INSTALL_THREADS={actual_threads}')
                 if this_bdle["version"]:
-                    print(f'MFBENCH_INSTALL_VERSION={this_bdle["version"]}')
+                    print(f'MFBENCH_INSTALL_VERSION="{this_bdle["version"]}"')
                 else:
                     print('MFBENCH_INSTALL_VERSION=""')
                 if 'git' in this_bdle:
+                    actual_topdir  = this_bdle.get('topdir', opts.item)
+                    print(f'MFBENCH_INSTALL_TOPDIR={actual_topdir}')
                     print(f'MFBENCH_INSTALL_GIT={this_bdle["git"]}')
                 else:
-                    actual_source = opts.item + '-' + this_bdle['version'] + '.' + this_bdle['archive']
+                    actual_topdir  = this_bdle.get('topdir', opts.item + '-' + this_bdle['version'])
+                    actual_archive = this_bdle.get('archive', 'tar.gz')
+                    actual_source  = this_bdle.get('source', actual_topdir + '.' + actual_archive)
+                    print(f'MFBENCH_INSTALL_TOPDIR={actual_topdir}')
                     print(f'MFBENCH_INSTALL_SOURCE={actual_source}')
                 if 'gmkpack' in this_bdle:
-                    print('MFBENCH_INSTALL_GMKPACK=true')
-                    print(f'MFBENCH_INSTALL_TARGET=$MFBENCH_THISPACK/{this_bdle["gmkpack"]}')
+                    print('MFBENCH_INSTALL_GMKPACK=yes')
+                    print(f'MFBENCH_INSTALL_TARGET=$MFBENCH_ROOTPACK/$MFBENCH_PACK/{this_bdle["gmkpack"]}')
                 else:
+                    print('MFBENCH_INSTALL_GMKPACK=no')
                     if bdle_type.startswith('lib'):
                         print('MFBENCH_INSTALL_TARGET=$MFBENCH_INSTALL/$MFBENCH_ARCH')
                     else:
