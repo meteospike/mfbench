@@ -253,8 +253,10 @@ EOF
 function mfbench_post_install_ial ()
 {
   [[ ! -d $MFBENCH_INSTALL_TARGET ]] && \mkdir -p $MFBENCH_INSTALL_TARGET
+
   local_name=$(basename $MFBENCH_INSTALL_TARGET)
   \cd $(dirname $MFBENCH_INSTALL_TARGET)
+
   if [[ "$MFBENCH_INSTALL_GIT" == "" ]]; then
     echo "Move $MFBENCH_BUILD/$MFBENCH_INSTALL_TOPDIR as $MFBENCH_INSTALL_TARGET"
     \rm -rf $local_name

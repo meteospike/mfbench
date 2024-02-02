@@ -107,6 +107,10 @@ while [[ $# -gt 0 ]]; do
         echo "-- COMPILE------------------"
         echo " + mfb mkmain               : Create a complete base pack including hub and main"
         echo " + mfb mkpack               : Create an incremental pack on top of a previous one"
+        echo " + mfb icsupd               : Apply existing filters functions on ics files of created pack"
+        echo " + mfb pack                 : Display the full path of the current pack"
+        echo " + mfb nest                 : Set the current directory as the current pack"
+        echo " + mfb compile              : Compile through ics files in the current pack"
       fi
 
       if [ "$chapter" = "inputs" ]; then
@@ -252,8 +256,7 @@ while [[ $# -gt 0 ]]; do
 
     echo "Freezing actuel mfbench environment"
 
-    unset MFBENCH_FUNCTIONS_DIRECTORIES
-    unset MFBENCH_FUNCTIONS_INSTALLS
+    unset $(env | fgrep MFBENCH_FUNCTIONS_ | cut -d "=" -f1)
 
     env | fgrep MFBENCH_ | sort -u > $MFBENCH_PROFDIR/env.profile
     env | fgrep OMP_     | sort -u > $MFBENCH_PROFDIR/env.omp
@@ -567,9 +570,9 @@ while [[ $# -gt 0 ]]; do
       set -a; source $MFBENCH_STORE/$this_todo.current; set +a
       \rm -rf $MFBENCH_STORE/$this_todo.current
 
-      if [ "$MFBENCH_INSTALL_MKARCH" == "yes" ]; then
-        mandatory_var_msg "$this_todo '$this_item'" arch opts
-      fi
+      [[ "$MFBENCH_INSTALL_MKARCH"  == "yes" ]] && mandatory_var_msg "$this_todo '$this_item'" arch opts
+      [[ "$MFBENCH_INSTALL_GMKPACK" == "yes" ]] && mandatory_var_msg "$this_todo '$this_item'" pack
+
 
       [[ "$tempo_fake" == "true" ]] && continue
 
@@ -650,41 +653,69 @@ while [[ $# -gt 0 ]]; do
       echo "$MFBENCH_ROOTPACK/$MFBENCH_PACK"
     fi
 
+  elif [ "$mfb" == "nest" ]; then
+
+    mandatory_var_msg "'$mfb'" rootpack
+
+    this_root=$(dirname $PWD)
+    this_pack=$(basename $PWD)
+
+    if [ "$this_root" != "$MFBENCH_ROOTPACK" ]; then
+      echo "This is not a proper location for a pack" >&2
+      exit 1
+    fi
+
+    export MFBENCH_PACK=$this_pack
+    \ls src/inter.1 2>/dev/null
+    if [ $? -eq 0 ]; then
+      export MFBENCH_LASTPACK=$this_pack
+    else
+      unset MFBENCH_LASTPACK
+      export MFBENCH_MAINPACK=$this_pack
+    fi
+
+    set -- freeze $*
+
   elif [ "$mfb" == "mkmain" ]; then
 
     mandatory_var_msg "'$mfb'" rootpack arch opts
 
     if [ "$MFBENCH_PACK" == "" ]; then
-      export this_cycle=${MFBENCH_CYCLE:-49t0}
-      export this_branch=${MFBENCH_BRANCH:-rapsmain}
-      export this_packid=${MFBENCH_PACKID:-01}
+      this_cycle=${MFBENCH_CYCLE:-49t0}
+      this_branch=${MFBENCH_BRANCH:-rapsmain}
+      this_packid=${MFBENCH_PACKID:-01}
       export MFBENCH_PACK=${this_cycle}_${this_branch}.$this_packid.$MFBENCH_ARCH.$MFBENCH_OPTS
     else
-      export this_cycle=$(echo $MFBENCH_PACK | cut -d "." -f1 | cut -d "_" -f1)
-      export this_branch=$(echo $MFBENCH_PACK | cut -d "." -f1 | cut -d "_" -f2)
-      export this_packid=$(echo $MFBENCH_PACK | cut -d "." -f2)
+      this_cycle=$(echo $MFBENCH_PACK | cut -d "." -f1 | cut -d "_" -f1)
+      this_branch=$(echo $MFBENCH_PACK | cut -d "." -f1 | cut -d "_" -f2)
+      this_packid=$(echo $MFBENCH_PACK | cut -d "." -f2)
     fi
 
     \cd $MFBENCH_ROOTPACK
     if [ -d $MFBENCH_PACK ]; then
       echo "Pack $MFBENCH_PACK already created"
-    else
-      echo "Creating base pack $MFBENCH_PACK"
-      [[ "$tempo_fake" == "true" ]] && continue
-      export MFBENCH_PACKMAIN=$MFBENCH_PACK
-      gmkpack \
-        -r $this_cycle  \
-        -b $this_branch \
-        -n $this_packid \
-        -l $MFBENCH_ARCH -o $MFBENCH_OPTS -a -K -p $(cat $MFBENCH_CONF/gmkpack-binaries)
-        set -- freeze $*
+      continue
     fi
+
+    echo "Creating base pack $MFBENCH_PACK"
+    [[ "$tempo_fake" == "true" ]] && continue
+
+    gmkpack \
+      -r $this_cycle  \
+      -b $this_branch \
+      -n $this_packid \
+      -l $MFBENCH_ARCH -o $MFBENCH_OPTS -a -K -p $(cat $MFBENCH_CONF/gmkpack-binaries)
+
+    export MFBENCH_MAINPACK=$MFBENCH_PACK
+    set -- freeze icsupd $*
 
   elif [ "$mfb" == "mkpack" ]; then
 
-    mandatory_var_msg "'$mfb'" rootpack arch opts packmain
+    mandatory_var_msg "'$mfb'" arch opts rootpack mainpack
 
-    export this_cycle=${MFBENCH_CYCLE:-$(echo $MFBENCH_PACKMAIN | cut -d "." -f1 | cut -d "_" -f1)}
+    main_cycle=$(echo $MFBENCH_MAINPACK | cut -d "." -f1 | cut -d "_" -f1)
+    main_branch=$(echo $MFBENCH_MAINPACK | cut -d "." -f1 | cut -d "_" -f2)
+    main_packid=$(echo $MFBENCH_MAINPACK | cut -d "." -f2)
 
     while [[ $# -gt 0 ]]; do
       if [[ $1 =~ $isnumber ]]; then
@@ -695,21 +726,64 @@ while [[ $# -gt 0 ]]; do
       shift
     done
 
-    export MFBENCH_PACK=${this_cycle}_${this_branch}.$this_packid.$MFBENCH_ARCH.$MFBENCH_OPTS
+    if [ "$MFBENCH_LASTPACK" == "" ]; then
+      last_branch=${main_branch//main/dev}
+      base_branch=$main_branch
+      last_packid=00
+      base_packid=$main_packid
+    else
+      last_branch=$(echo $MFBENCH_LASTPACK | cut -d "." -f1 | cut -d "_" -f2)
+      base_branch=$last_branch
+      last_packid=$(echo $MFBENCH_LASTPACK | cut -d "." -f2)
+      base_packid=$last_packid
+    fi
+
+    if [ "$this_branch" == "" ]; then
+      this_branch=$last_branch
+    fi
+
+    if [ "$this_packid" == "" ]; then
+      this_packid=$(($last_packid+1))
+    fi
+
+    this_packid=$(printf "%02d" $this_packid)
+
+    export MFBENCH_PACK=${main_cycle}_${this_branch}.$this_packid.$MFBENCH_ARCH.$MFBENCH_OPTS
 
     \cd $MFBENCH_ROOTPACK
+
     if [ -d $MFBENCH_PACK ]; then
       echo "Pack $MFBENCH_PACK already created"
-    else
-      echo "Creating base pack $MFBENCH_PACK"
-      [[ "$tempo_fake" == "true" ]] && continue
-      gmkpack \
-        -r $this_cycle  \
-        -u $this_branch \
-        -n $this_packid \
-        -l $MFBENCH_ARCH -o $MFBENCH_OPTS
-      set -- freeze
+      continue
     fi
+
+    echo "Creating base pack $MFBENCH_PACK"
+    [[ "$tempo_fake" == "true" ]] && continue
+
+    gmkpack \
+      -r $main_cycle  \
+      -b $base_branch \
+      -u $this_branch \
+      -n $this_packid \
+      -v $base_packid \
+      -l $MFBENCH_ARCH -o $MFBENCH_OPTS -p $(cat $MFBENCH_CONF/gmkpack-binaries)
+
+    export MFBENCH_LASTPACK=$MFBENCH_PACK
+    set -- freeze icsupd
+
+  elif [ "$mfb" == "icsupd" ]; then
+
+    mandatory_var_raw rootpack pack conf
+
+    if [ "$MFBENCH_FUNCTIONS_COMPILE" != "true" ]; then
+      source $MFBENCH_SCRIPTS/functions/compile.sh
+    fi
+
+    \cd $MFBENCH_ROOTPACK/$MFBENCH_PACK
+    for compile_func in $(declare -F | fgrep mfbench_compile_ | cut -d " " -f3); do
+      echo "Apply function $compile_func..."
+      $compile_func
+    done
 
   elif [ "$mfb" == "compilers" ]; then
 
@@ -719,10 +793,7 @@ while [[ $# -gt 0 ]]; do
 
     if [ "$MFBENCH_PACK" == "" ]; then
       mandatory_var_raw arch opts
-      this_cycle=${MFBENCH_CYCLE:-49t0}
-      this_branch=${MFBENCH_BRANCH:-rapsmain}
-      this_packid=${MFBENCH_PACKID:-01}
-      export MFBENCH_PACK=${this_cycle}_${this_branch}.$this_packid.$MFBENCH_ARCH.$MFBENCH_OPTS
+      export MFBENCH_PACK=$(\ls -tr1d *.*.$MFBENCH_ARCH.$MFBENCH_OPTS | tail -1)
     fi
 
     source $MFBENCH_SCRIPTS_WRAPPERS/setup_compilers.sh
