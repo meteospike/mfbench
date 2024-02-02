@@ -111,6 +111,7 @@ while [[ $# -gt 0 ]]; do
         echo " + mfb pack                 : Display the full path of the current pack"
         echo " + mfb nest                 : Set the current directory as the current pack"
         echo " + mfb compile              : Compile through ics files in the current pack"
+        echo " + mfb clean                : Clean and reset the current pack"
       fi
 
       if [ "$chapter" = "inputs" ]; then
@@ -802,16 +803,27 @@ while [[ $# -gt 0 ]]; do
     pwd
     \rm -f compile.log
 
-    for ics_builder in $(\ls -1 | perl -ne 'print if /^ics_[a-z]+$/go;'); do
-      if [ "$tempo_fake" == "true" ]; then
-        echo "Could build $ics_builder"
-      else
+    [[ $# -eq 0 ]] && set -- $(cat $MFBENCH_CONF/gmkpack-packages $MFBENCH_CONF/gmkpack-binaries)
+
+    while [[ $# -gt 0 ]]; do
+      ics_builder="ics_$1"
+      shift
+      if [ -f $ics_builder ]; then
         echo "Build $ics_builder"
-        ./$ics_builder 2>&1 | tee $ics_builder.log
+        [[ "$tempo_fake" != "true" ]] && ./$ics_builder 2>&1 | tee $ics_builder.log
+      else
+        echo "No such builder: $ics_builder" >&2
       fi
     done
 
     [[ -d hub/local/build ]] && \rm -rf hub/local/build
+
+  elif [ "$mfb" == "clean" ]; then
+
+    mandatory_var_raw rootpack pack
+    \cd $MFBENCH_ROOTPACK/$MFBENCH_PACK
+    cleanpack
+    resetpack
 
   elif [ "$mfb" == "tube" ]; then
 
