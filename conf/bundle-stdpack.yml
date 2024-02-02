@@ -84,9 +84,11 @@ hub:
 
 main:
 
-    IAL:
+    ial:
         version : 49t0_rapslite.09
         archive : tgz
+        topdir  : IAL
+        source  : ial-49t0_rapslite.09
         gmkpack : 'src/local'
 
 dummy:

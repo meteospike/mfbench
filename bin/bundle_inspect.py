@@ -60,7 +60,7 @@ else:
                 else:
                     actual_topdir  = this_bdle.get('topdir', opts.item + '-' + this_bdle['version'])
                     actual_archive = this_bdle.get('archive', 'tar.gz')
-                    actual_source  = this_bdle.get('source', actual_topdir + '.' + actual_archive)
+                    actual_source  = this_bdle.get('source', actual_topdir) + '.' + actual_archive
                     print(f'MFBENCH_INSTALL_TOPDIR={actual_topdir}')
                     print(f'MFBENCH_INSTALL_SOURCE={actual_source}')
                 if 'gmkpack' in this_bdle:

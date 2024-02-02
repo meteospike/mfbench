@@ -3,8 +3,10 @@
 build/
 data/
 install/
+pack/
+rootpack
 sources/
-*-DEFAULT
+*-SELECT.*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

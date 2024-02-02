@@ -20,6 +20,31 @@ isnumber='^[0-9]+$'
 isbundle='^bundle\-'
 isyaml='\.ya?ml$'
 
+
+function mandatory_var_raw ()
+{
+  for this_var in $*; do
+    actual_var=MFBENCH_${this_var^^}
+    if [ "${!actual_var}" == "" ]; then
+      echo "Variable $actual_var is not set" >&2
+      exit 1
+    fi
+  done
+}
+
+function mandatory_var_msg ()
+{
+  this_msg=$1
+  shift
+  for this_var in $*; do
+    actual_var=MFBENCH_${this_var^^}
+    if [ "${!actual_var}" == "" ]; then
+      echo "Variable $actual_var must be defined for $this_msg" >&2
+      exit 1
+    fi
+  done
+}
+
 if [[ $# == 0 ]]; then
     set -- help
 elif [[ "$1" != "init" && "$1" != "on" ]]; then
@@ -35,7 +60,7 @@ while [[ $# -gt 0 ]]; do
 
   if [ "$mfb" == "help" ]; then
 
-    [[ $# -eq 0 ]] && set -- settings install inputs execution outputs
+    [[ $# -eq 0 ]] && set -- settings install compile inputs execution outputs
 
     while [[ $# -gt 0 ]]; do
 
@@ -76,6 +101,12 @@ while [[ $# -gt 0 ]]; do
         echo " + mfb python               : Check Python path and version and seaarch path for modules"
         echo " + mfb installed            : List local install items"
         echo " + mfb track [items]        : List local install files for items"
+      fi
+
+      if [ "$chapter" = "compile" ]; then
+        echo "-- COMPILE------------------"
+        echo " + mfb mkmain               : Create a complete base pack including hub and main"
+        echo " + mfb mkpack               : Create an incremental pack on top of a previous one"
       fi
 
       if [ "$chapter" = "inputs" ]; then
@@ -291,7 +322,7 @@ while [[ $# -gt 0 ]]; do
     if [ "$MFBENCH_ARCH" == "" ]; then
       echo "Variable MFBENCH_ARCH is not set"
     else
-      echo "MFBENCH_ARCH=$MFBENCH_ARCH"
+      echo $MFBENCH_ARCH
     fi
 
   elif [ "$mfb" == "opts" ]; then
@@ -299,7 +330,7 @@ while [[ $# -gt 0 ]]; do
     if [ "$MFBENCH_OPTS" == "" ]; then
       echo "Variable MFBENCH_OPTS is not set"
     else
-      echo "MFBENCH_OPTS=$MFBENCH_OPTS"
+      echo $MFBENCH_OPTS
     fi
 
   elif [ "$mfb" == "path" ]; then
@@ -485,11 +516,11 @@ while [[ $# -gt 0 ]]; do
 
   elif [ "$mfb" == "flat-bundle" ]; then
 
-    bundle_inspect.py --flat
+    exec bundle_inspect.py --flat
 
   elif [ "$mfb" == "show-bundle" ]; then
 
-    bundle_inspect.py --conf
+    exec bundle_inspect.py --conf
 
   elif [ "$mfb" == "bundle" ]; then
 
@@ -536,14 +567,8 @@ while [[ $# -gt 0 ]]; do
       set -a; source $MFBENCH_STORE/$this_todo.current; set +a
       \rm -rf $MFBENCH_STORE/$this_todo.current
 
-      if [[ "$MFBENCH_INSTALL_MKARCH" == "yes" && "$MFBENCH_ARCH" == "" ]]; then
-        echo "Variable MFBENCH_ARCH must be defined for $this_todo '$this_item'" >&2
-        continue
-      fi
-
-      if [[ "$MFBENCH_INSTALL_GMKPACK" == "yes" && "$MFBENCH_PACK" == "" ]]; then
-        echo "Variable MFBENCH_PACK must be defined for $this_todo '$this_item'" >&2
-        continue
+      if [ "$MFBENCH_INSTALL_MKARCH" == "yes" ]; then
+        mandatory_var_msg "$this_todo '$this_item'" arch opts
       fi
 
       [[ "$tempo_fake" == "true" ]] && continue
@@ -613,44 +638,31 @@ while [[ $# -gt 0 ]]; do
 
   elif [ "$mfb" == "pack" ]; then
 
-    if [ "$MFBENCH_ROOTPACK" == "" ]; then
-      echo "Variable MFBENCH_ROOTPACK must be defined for '$mfb'" >&2
-      exit 1
-    fi
+    mandatory_var_msg "'$mfb'" rootpack
 
     if [ "$MFBENCH_PACK" == "" ]; then
-      export this_cycle=${MFBENCH_PACK_CYCLE:-49t0}
-      export this_branch=${MFBENCH_PACK_BRANCH:-base}
-      export this_num=${MFBENCH_PACK_NUM:-01}
-      echo ${this_cycle}_${this_branch}.$this_num.$MFBENCH_ARCH.$MFBENCH_OPTS
+      mandatory_var_raw arch opts
+      this_cycle=${MFBENCH_CYCLE:-49t0}
+      this_branch=${MFBENCH_BRANCH:-rapsmain}
+      this_packid=${MFBENCH_PACKID:-01}
+      echo "$MFBENCH_ROOTPACK/${this_cycle}_${this_branch}.$this_packid.$MFBENCH_ARCH.$MFBENCH_OPTS"
     else
       echo "$MFBENCH_ROOTPACK/$MFBENCH_PACK"
     fi
 
-  elif [ "$mfb" == "mkhub" ]; then
+  elif [ "$mfb" == "mkmain" ]; then
 
-    if [ "$MFBENCH_ROOTPACK" == "" ]; then
-      echo "Variable MFBENCH_ROOTPACK must be defined for '$mfb'" >&2
-      exit 1
-    fi
-
-    if [ "$MFBENCH_ARCH" == "" ]; then
-      echo "Variable MFBENCH_ARCH must be defined for '$mfb'" >&2
-      exit 1
-    fi
-
-    if [ "$MFBENCH_OPTS" == "" ]; then
-      echo "Variable MFBENCH_OPTS must be defined for '$mfb'" >&2
-      exit 1
-    fi
-
-    export MFBENCH_PACK_CYCLE=${MFBENCH_PACK_CYCLE:-49t0}
-    export MFBENCH_PACK_BRANCH=${MFBENCH_PACK_BRANCH:-base}
-    export MFBENCH_PACK_NUM=${MFBENCH_PACK_NUM:-01}
+    mandatory_var_msg "'$mfb'" rootpack arch opts
 
     if [ "$MFBENCH_PACK" == "" ]; then
-      export MFBENCH_PACK=${MFBENCH_PACK_CYCLE}_${MFBENCH_PACK_BRANCH}.$MFBENCH_PACK_NUM.$MFBENCH_ARCH.$MFBENCH_OPTS
-      set -- freeze $*
+      export this_cycle=${MFBENCH_CYCLE:-49t0}
+      export this_branch=${MFBENCH_BRANCH:-rapsmain}
+      export this_packid=${MFBENCH_PACKID:-01}
+      export MFBENCH_PACK=${this_cycle}_${this_branch}.$this_packid.$MFBENCH_ARCH.$MFBENCH_OPTS
+    else
+      export this_cycle=$(echo $MFBENCH_PACK | cut -d "." -f1 | cut -d "_" -f1)
+      export this_branch=$(echo $MFBENCH_PACK | cut -d "." -f1 | cut -d "_" -f2)
+      export this_packid=$(echo $MFBENCH_PACK | cut -d "." -f2)
     fi
 
     \cd $MFBENCH_ROOTPACK
@@ -659,11 +671,44 @@ while [[ $# -gt 0 ]]; do
     else
       echo "Creating base pack $MFBENCH_PACK"
       [[ "$tempo_fake" == "true" ]] && continue
+      export MFBENCH_PACKMAIN=$MFBENCH_PACK
       gmkpack \
-        -r $MFBENCH_PACK_CYCLE \
-        -b $MFBENCH_PACK_BRANCH \
-        -n $MFBENCH_PACK_NUM \
-        -l $MFBENCH_ARCH -o $MFBENCH_OPTS -a -K -k
+        -r $this_cycle  \
+        -b $this_branch \
+        -n $this_packid \
+        -l $MFBENCH_ARCH -o $MFBENCH_OPTS -a -K -p $(cat $MFBENCH_CONF/gmkpack-binaries)
+        set -- freeze $*
+    fi
+
+  elif [ "$mfb" == "mkpack" ]; then
+
+    mandatory_var_msg "'$mfb'" rootpack arch opts packmain
+
+    export this_cycle=${MFBENCH_CYCLE:-$(echo $MFBENCH_PACKMAIN | cut -d "." -f1 | cut -d "_" -f1)}
+
+    while [[ $# -gt 0 ]]; do
+      if [[ $1 =~ $isnumber ]]; then
+        this_packid=$1
+      else
+        this_branch=$1
+      fi
+      shift
+    done
+
+    export MFBENCH_PACK=${this_cycle}_${this_branch}.$this_packid.$MFBENCH_ARCH.$MFBENCH_OPTS
+
+    \cd $MFBENCH_ROOTPACK
+    if [ -d $MFBENCH_PACK ]; then
+      echo "Pack $MFBENCH_PACK already created"
+    else
+      echo "Creating base pack $MFBENCH_PACK"
+      [[ "$tempo_fake" == "true" ]] && continue
+      gmkpack \
+        -r $this_cycle  \
+        -u $this_branch \
+        -n $this_packid \
+        -l $MFBENCH_ARCH -o $MFBENCH_OPTS
+      set -- freeze
     fi
 
   elif [ "$mfb" == "compilers" ]; then
@@ -672,14 +717,27 @@ while [[ $# -gt 0 ]]; do
 
   elif [ "$mfb" == "compile" ]; then
 
+    if [ "$MFBENCH_PACK" == "" ]; then
+      mandatory_var_raw arch opts
+      this_cycle=${MFBENCH_CYCLE:-49t0}
+      this_branch=${MFBENCH_BRANCH:-rapsmain}
+      this_packid=${MFBENCH_PACKID:-01}
+      export MFBENCH_PACK=${this_cycle}_${this_branch}.$this_packid.$MFBENCH_ARCH.$MFBENCH_OPTS
+    fi
+
     source $MFBENCH_SCRIPTS_WRAPPERS/setup_compilers.sh
 
     \cd $MFBENCH_ROOTPACK/$MFBENCH_PACK
+    pwd
     \rm -f compile.log
 
     for ics_builder in $(\ls -1 | perl -ne 'print if /^ics_[a-z]+$/go;'); do
-      echo "Build $ics_builder"
-      ./$ics_builder 2>&1 | tee $ics_builder.log
+      if [ "$tempo_fake" == "true" ]; then
+        echo "Could build $ics_builder"
+      else
+        echo "Build $ics_builder"
+        ./$ics_builder 2>&1 | tee $ics_builder.log
+      fi
     done
 
     [[ -d hub/local/build ]] && \rm -rf hub/local/build
