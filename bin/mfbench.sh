@@ -159,6 +159,7 @@ while [[ $# -gt 0 ]]; do
     export MFBENCH_ROOT=$PWD
     export MFBENCH_PROFILE=${1:-default}
     export MFBENCH_ARCH=$ARCH
+    export MFBENCH_AUTOPACK=yes
 
     export MFBENCH_STORE=$MFBENCH_ROOT/.mfb
     if [ ! -d $MFBENCH_STORE ]; then
@@ -255,7 +256,7 @@ while [[ $# -gt 0 ]]; do
 
   elif [ "$mfb" == "freeze" ]; then
 
-    echo "Freezing actuel mfbench environment"
+    echo "Freezing current mfbench environment"
 
     unset $(env | fgrep MFBENCH_FUNCTIONS_ | cut -d "=" -f1)
 
@@ -374,11 +375,20 @@ while [[ $# -gt 0 ]]; do
 
   elif [ "$mfb" == "unset" ]; then
 
-    for this_var in $*; do
-      unset "MFBENCH_${this_var^^}"
+    updated=0
+    while [[ $# -gt 0 ]]; do
+      this_var="MFBENCH_${1^^}"
+      shift
+      if [ "${!this_var}" == "" ]; then
+        echo "Ignore ${this_var}"
+      else
+        echo "Unset ${this_var}"
+        unset "MFBENCH_${this_var}"
+        updated=1
+      fi
     done
 
-    set -- freeze
+    [[ $updated -eq 1 ]] && set -- freeze
 
   elif [ "$mfb" == "omp" ]; then
 
@@ -544,14 +554,23 @@ while [[ $# -gt 0 ]]; do
     this_todo=$1
     shift
 
-    bundle_all=$(bundle_inspect.py --flat)
-    bundle_all=${bundle_all// /:}
+    bundle_items=$(bundle_inspect.py --flat)
+    bundle_items=${bundle_items// /:}
+    bundle_types=$(bundle_inspect.py --list)
+    bundle_types=${bundle_types// /:}
 
     while [[ $# -gt 0 ]]; do
 
-      if [[ ! ":$bundle_all:" == *":$1:"* ]]; then
+      if [[ ":$bundle_types:" == *":$1:"* ]]; then
+        this_type=$1
+        shift
+        echo "Insert all '$this_type' type items"
+        set -- $(bundle_inspect.py --type $this_type) $*
+      fi
+
+      if [[ ! ":$bundle_items:" == *":$1:"* ]]; then
         echo "Item '$1' is unknown in the current bundle" >&2
-        break
+        exit 1
       fi
 
       this_item=$1
@@ -708,7 +727,12 @@ while [[ $# -gt 0 ]]; do
       -l $MFBENCH_ARCH -o $MFBENCH_OPTS -a -K -p $(cat $MFBENCH_CONF/gmkpack-binaries)
 
     export MFBENCH_MAINPACK=$MFBENCH_PACK
-    set -- freeze icsupd $*
+
+    if [ "$MFBENCH_AUTOPACK" == "yes" ]; then
+      set -- freeze icsupd install $(bundle_inspect.py --type hub) $(bundle_inspect.py --type main)
+    else
+      set -- freeze icsupd $*
+    fi
 
   elif [ "$mfb" == "mkpack" ]; then
 

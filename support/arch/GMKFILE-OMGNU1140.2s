@@ -12,7 +12,7 @@ FRTNAME = $MFBENCH_COMPILER_MPIF90
 
 VCCNAME = $MFBENCH_COMPILER_MPICC
 
-# C++ (cross-)compiler
+# C++ (cross-)com1Gpiler
 # --------------------
 
 CXXNAME = $MFBENCH_COMPILER_MPICXX
@@ -30,7 +30,7 @@ LNK_MPCCNATIVE =
 # fypp preprocessor
 # -----------------
 
-GMK_FYPP = fypp
+GMK_FYPP = $MFBENCH_INSTALL/tools/yaml/fypp/bin/fypp
 
 # fypp preprocessor background flags
 # ----------------------------------
@@ -41,6 +41,11 @@ GMK_FYPP_FLAGS = -M $MFBENCH_INSTALL/tools/yaml/lib -m os -m yaml
 # ----------------------------------------
 
 LIBFRT = echo OMGNU1140
+
+# GPU Specifications
+# ------------------
+
+GPU = none
 
 # Basic compilation flags
 # -----------------------
@@ -149,7 +154,7 @@ LNK_CXX = $MFBENCH_COMPILER_MPICXX
 # Fortran linking flags
 # ----------------------
 
-LNK_FLAGS = -fopenmp -ffast-math -ldl -lrt
+LNK_FLAGS = -fopenmp -ffast-math -ldl -lrt -Wl,-rpath,$MFBENCH_INSTALL/$MFBENCH_ARCH/lib
 
 # Additional linking flags to LNK_FLAGS for c++ executable
 # --------------------------------------------------------
@@ -260,19 +265,19 @@ LD_USR08 = naglitedummy
 # "OASIS":
 LD_USR09 = oasisdummy
 # "Grib_api":
-LD_USR_GRIB_API_F90 = eccodes_f90
-LD_USR_GRIB_API = eccodes
+LD_USR_GRIB_API_F90 = $MFBENCH_INSTALL/$MFBENCH_ARCH/lib/libeccodes_f90.so
+LD_USR_GRIB_API = $MFBENCH_INSTALL/$MFBENCH_ARCH/lib/libeccodes.so
 # "JPEG library":
 LD_USR_JPEG =
 # "EECFI" for aeolus:
 LD_USR_EECFI =
 # "Netcdf :"
-LD_USR_NETCDF_F = netcdff
-LD_USR_NETCDF = netcdf
+LD_USR_NETCDF_F = $MFBENCH_INSTALL/$MFBENCH_ARCH/lib/libnetcdff.so
+LD_USR_NETCDF = $MFBENCH_INSTALL/$MFBENCH_ARCH/lib/libnetcdf.so
 # "HDF5" :
-LD_USR_HDF5_HLFORTRAN = hdf5hl_fortran
-LD_USR_HDF5_FORTRAN = hdf5_fortran
-LD_USR_HDF5 = hdf5
+LD_USR_HDF5_HLFORTRAN = $MFBENCH_INSTALL/$MFBENCH_ARCH/lib/libhdf5_hl_fortran.a
+LD_USR_HDF5_FORTRAN = $MFBENCH_INSTALL/$MFBENCH_ARCH/lib/libhdf5_fortran.a
+LD_USR_HDF5 = $MFBENCH_INSTALL/$MFBENCH_ARCH/lib/libhdf5.a
 # "Meteo-France dummies library (IFS only):"
 LD_USR_MF_DUMMY =
 # "Magics :"
@@ -309,9 +314,9 @@ LD_USR_FIELD_API = field_api_sp
 # ----------------------------------------------------
 
 # Lapack:
-LD_LANG01 = lapack
+LD_LANG01 = $MFBENCH_INSTALL/$MFBENCH_ARCH/lib/liblapack.so
 # Blas:
-LD_LANG02 = blas
+LD_LANG02 = $MFBENCH_INSTALL/$MFBENCH_ARCH/lib/libblas.so
 
 # System-dependent libraries - ALWAYS LOADED - (absolute filename or short name) :
 # ------------------------------------------------------------------------------
@@ -341,7 +346,7 @@ LD_LIBVFL =
 # External include pathes (path1:path2:...)
 # ------------------------------------------
 
-INCLUDEPATH =
+INCLUDEPATH = $MFBENCH_INSTALL/$MFBENCH_ARCH/include:$MFBENCH_INSTALL/$MFBENCH_ARCH/share
 
 # (Cross-) nm command & options for BSD format
 # --------------------------------------------

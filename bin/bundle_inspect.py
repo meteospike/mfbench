@@ -19,6 +19,7 @@ parser.add_argument('--item', default=None)
 parser.add_argument('--conf', action='store_true')
 parser.add_argument('--list', action='store_true')
 parser.add_argument('--flat', action='store_true')
+parser.add_argument('--type', default=None)
 
 opts = parser.parse_args()
 
@@ -34,6 +35,11 @@ bdle_flat = list()
 
 if opts.list:
     print(' '.join(bdle_entries))
+elif opts.type:
+    if opts.type in bdle_dict:
+        print(' '.join(sorted(bdle_dict[opts.type].keys())))
+    else:
+        sys.stderr.write(f"Type '{opts.type}' not in that bundle\n")
 else:
     for bdle_type in bdle_entries:
         if bdle_dict[bdle_type]:
