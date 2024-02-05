@@ -383,7 +383,7 @@ while [[ $# -gt 0 ]]; do
         echo "Ignore ${this_var}"
       else
         echo "Unset ${this_var}"
-        unset "MFBENCH_${this_var}"
+        unset ${this_var}
         updated=1
       fi
     done
@@ -673,7 +673,7 @@ while [[ $# -gt 0 ]]; do
 
     if [ "$MFBENCH_PACK" == "" ]; then
       mandatory_var_raw arch opts
-      this_cycle=${MFBENCH_CYCLE:-49t0}
+      this_cycle=${MFBENCH_CYCLE:-$(cat $MFBENCH_CONF/gmkpack-cycle)}
       this_branch=${MFBENCH_BRANCH:-rapsmain}
       this_packid=${MFBENCH_PACKID:-01}
       echo "$MFBENCH_ROOTPACK/${this_cycle}_${this_branch}.$this_packid.$MFBENCH_ARCH.$MFBENCH_OPTS"
@@ -708,16 +708,22 @@ while [[ $# -gt 0 ]]; do
 
     mandatory_var_msg "'$mfb'" rootpack arch opts
 
-    if [ "$MFBENCH_PACK" == "" ]; then
-      this_cycle=${MFBENCH_CYCLE:-49t0}
-      this_branch=${MFBENCH_BRANCH:-rapsmain}
-      this_packid=${MFBENCH_PACKID:-01}
-      export MFBENCH_PACK=${this_cycle}_${this_branch}.$this_packid.$MFBENCH_ARCH.$MFBENCH_OPTS
-    else
-      this_cycle=$(echo $MFBENCH_PACK | cut -d "." -f1 | cut -d "_" -f1)
-      this_branch=$(echo $MFBENCH_PACK | cut -d "." -f1 | cut -d "_" -f2)
-      this_packid=$(echo $MFBENCH_PACK | cut -d "." -f2)
-    fi
+    this_cycle=${MFBENCH_CYCLE:-$(cat $MFBENCH_CONF/gmkpack-cycle)}
+    this_branch=${MFBENCH_BRANCH:-rapsmain}
+    this_packid=${MFBENCH_PACKID:-01}
+
+    while [[ $# -gt 0 ]]; do
+      if [[ $1 =~ $isnumber ]]; then
+        this_packid=$1
+      else
+        this_branch=$1
+      fi
+      shift
+    done
+
+    this_packid=$(printf "%02d" $this_packid)
+
+    export MFBENCH_PACK=${this_cycle}_${this_branch}.$this_packid.$MFBENCH_ARCH.$MFBENCH_OPTS
 
     \cd $MFBENCH_ROOTPACK
     if [ -d $MFBENCH_PACK ]; then
@@ -739,7 +745,7 @@ while [[ $# -gt 0 ]]; do
     if [ "$MFBENCH_AUTOPACK" == "yes" ]; then
       set -- freeze icsupd install $(bundle_inspect.py --type hub) $(bundle_inspect.py --type main)
     else
-      set -- freeze icsupd $*
+      set -- freeze icsupd
     fi
 
   elif [ "$mfb" == "mkpack" ]; then
