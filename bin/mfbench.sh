@@ -616,18 +616,26 @@ while [[ $# -gt 0 ]]; do
       mfbench_${this_todo}_track_in $this_under
 
       todo_function="mfbench_${this_todo}_${this_under}"
+      type_function="mfbench_${this_todo}_${MFBENCH_INSTALL_TYPE}"
       if [[ "$(declare -F $todo_function)" == "$todo_function" ]]; then
-        echo "> Using specific $this_todo function $todo_function"
+        echo "> Processing specific $this_todo function $todo_function"
         $todo_function
+      elif [[ "$(declare -F $type_function)" == "$type_function" ]]; then
+        echo "> Processing type $this_todo function $type_function"
+        $type_function
       else
-        echo "> Generic $this_todo for $this_item"
+        echo "> Processing generic $this_todo for $this_item"
         mfbench_${this_todo}_generic
       fi
 
       post_function="mfbench_post_${this_todo}_${this_under}"
+      type_function="mfbench_post_${this_todo}_${MFBENCH_INSTALL_TYPE}"
       if [[ "$(declare -F $post_function)" == "$post_function" ]]; then
-        echo "> Processing post $this_todo $post_function"
+        echo "> Processing specific post $this_todo $post_function"
         $post_function
+      elif [[ "$(declare -F $type_function)" == "$type_function" ]]; then
+        echo "> Processing type post $this_todo function $type_function"
+        $type_function
       else
         echo "> No post $this_todo to be done"
       fi

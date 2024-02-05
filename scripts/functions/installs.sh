@@ -125,6 +125,39 @@ function mfbench_install_generic ()
 }
 
 # ------------------------------------------------------------------------------
+# TYPE INSTALL FUNCTIONS
+
+function mfbench_install_dummy ()
+{
+  \cd $MFBENCH_BUILD
+  bundle_inspect.py --load $MFBENCH_INSTALL_NAME | tee bundle_load.$MFBENCH_INSTALL_NAME.log
+  this_src=$(head -1 bundle_load.$MFBENCH_INSTALL_NAME.log)
+  if [ -f "$this_src" ]; then
+    $MFBENCH_COMPILER_CC -c $this_src
+    ar crv $MFBENCH_INSTALL_TARGET/$(basename $this_src .c).a $(basename $this_src .c).o
+  else
+    echo "Could not generate dummy source file for '$MFBENCH_INSTALL_NAME'" >&2
+    exit 1
+  fi
+}
+
+function mfbench_uninstall_dummy ()
+{
+  \cd $MFBENCH_BUILD
+  if [ -f bundle_load.$MFBENCH_INSTALL_NAME.log ]; then
+    this_src=$(head -1 bundle_load.$MFBENCH_INSTALL_NAME.log)
+    echo "Removing bundle_load.$MFBENCH_INSTALL_NAME.log"
+    \rm -f bundle_load.$MFBENCH_INSTALL_NAME.log
+    for this_file in $this_src $(basename $this_src .c).o $MFBENCH_INSTALL_TARGET/$(basename $this_src .c).a; do
+      if [ -f "$this_file" ]; then
+        echo "Removing $this_file"
+        \rm -f $this_file
+      fi
+    done
+  fi
+}
+
+# ------------------------------------------------------------------------------
 # SPECIFIC INSTALL OR POST INSTALL FUNCTIONS
 
 function mfbench_install_yaml ()
