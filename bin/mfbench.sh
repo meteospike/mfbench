@@ -45,6 +45,18 @@ function mandatory_var_msg ()
   done
 }
 
+function mfbench_logfile ()
+{
+  base_name=$1
+  last_logfile=$(\ls -1 $base_name.[0-9][0-9].log 2>/dev/null | tail -1)
+  if [ "$last_logfile" == "" ]; then
+    this_num="01"
+  else
+    this_num=$(echo $last_logfile | cut -d "." -f2 | perl -ne 'printf "%02d", int($_)+1;')
+  fi
+  echo "$base_name.$this_num.log"
+}
+
 if [[ $# == 0 ]]; then
     set -- help
 elif [[ "$1" != "init" && "$1" != "on" ]]; then
@@ -149,6 +161,7 @@ while [[ $# -gt 0 ]]; do
     export MFBENCH_ROOT=$PWD
     export MFBENCH_PROFILE=${1:-default}
     export MFBENCH_ARCH=$ARCH
+    export MFBENCH_MODE=std
     export MFBENCH_AUTOPACK=yes
 
     export MFBENCH_STORE=$MFBENCH_ROOT/.mfb
@@ -308,8 +321,12 @@ while [[ $# -gt 0 ]]; do
 
   elif [ "$mfb" == "profile" ]; then
 
-      echo "Current mfb profile is '$MFBENCH_PROFILE'"
+    echo $MFBENCH_PROFILE
+
+  elif [ "$mfb" == "profdir" ]; then
+
       \cd $MFBENCH_PROFDIR
+      pwd
       \ls -l
 
   elif [ "$mfb" == "arch" ]; then
@@ -345,6 +362,16 @@ while [[ $# -gt 0 ]]; do
         echo "Variable $varname is not set"
       else
         echo "$varname=${!varname}"
+      fi
+    done
+
+  elif [ "$mfb" == "get" ]; then
+
+    while [[ $# -gt 0 ]]; do
+      varname="MFBENCH_${1^^}"
+      shift
+      if [ "${!varname}" != "" ]; then
+        echo "${!varname}"
       fi
     done
 
@@ -402,6 +429,12 @@ while [[ $# -gt 0 ]]; do
     fi
 
     mfbench_listdir_def support/arch/GMKFILE $inum
+
+  elif [ "$mfb" == "select-gmkfile" ]; then
+
+    \cd $MFBENCH_SUPPORT_ARCH
+    \rm -f GMKFILE-SELECT.$(mfb profile)
+    \ln -s GMKFILE-$MFBENCH_ARCH.$MFBENCH_OPTS GMKFILE-SELECT.$MFBENCH_PROFILE
 
   elif [ "$mfb" == "sources" ]; then
 
@@ -539,6 +572,12 @@ while [[ $# -gt 0 ]]; do
     fi
 
     mfbench_listdir_def conf/bundle $inum
+
+  elif [ "$mfb" == "select-bundle" ]; then
+
+    \cd $MFBENCH_CONF
+    \rm -f BUNDLE-SELECT.$MFBENCH_PROFILE
+    \ln -s bundle-${MFBENCH_MODE}pack.yml BUNDLE-SELECT.$MFBENCH_PROFILE
 
   elif [ "$mfb" == "process" ]; then
 
@@ -874,7 +913,13 @@ while [[ $# -gt 0 ]]; do
 
   elif [ "$mfb" == "play" ]; then
 
-    echo "TODO..."
+    \cd $MFBENCH_JOBS
+
+    while [[ $# -gt 0 ]]; do
+      this_play=$1
+      shift
+      exec ./$this_play.sh
+    done
 
   elif [ "$mfb" == "redo" ]; then
 

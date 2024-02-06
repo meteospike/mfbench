@@ -2,18 +2,6 @@
 
 export MFBENCH_FUNCTIONS_COMPILE=true
 
-function mfbench_logfile ()
-{
-  base_name=$1
-  last_logfile=$(\ls -1 $base_name.[0-9][0-9].log 2>/dev/null | tail -1)
-  if [ "$last_logfile" == "" ]; then
-    this_num="01"
-  else
-    this_num=$(echo $last_logfile | cut -d "." -f2 | perl -ne 'printf "%02d", int($_)+1;')
-  fi
-  echo "$base_name.$this_num.log"
-}
-
 function mfbench_compile_1_threads ()
 {
   gmk_threads=${MFBENCH_THREADS:-$(cat $MFBENCH_CONF/gmkpack-threads)}
