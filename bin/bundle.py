@@ -10,7 +10,7 @@ import yaml
 
 
 parser = argparse.ArgumentParser(
-    prog = 'bundle_inspect',
+    prog = 'bundle',
     description = 'Inspect default or specified bundle file use to build mfbench'
 )
 

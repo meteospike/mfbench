@@ -116,28 +116,18 @@ while [[ $# -gt 0 ]]; do
 
       if [ "$chapter" = "inputs" ]; then
         echo "-- INPUTS ------------------"
-        echo " + mfb namless              : Show (with less) the main default namelist"
-        echo " + mfb namedit              : Edit (with vim) the main default namelist"
+        echo " + mfb inputs               : List available input configurations"
       fi
 
       if [ "$chapter" = "execution" ]; then
         echo "-- EXECUTION ---------------"
         echo " + mfb play                 : Run the mfbench actual configuration"
         echo " + mfb redo                 : Make and Play"
-        echo " + mfb job                  : Submit the mfbench job"
-        echo " + mfb log [items]          : Display last log or search inside it [items]"
-        echo " + mfb logdiff              : Compare last log output to reference"
       fi
 
       if [ "$chapter" = "outputs" ]; then
         echo "-- OUTPUTS -----------------"
-        echo " + mfb outputs [num]        : Change directory to last output or -num"
-        echo " + mfb llout                : List output directories"
-        echo " + mfb clrout               : Remove empty output directories"
-        echo " + mfb rmlast               : Remove last output directory"
-        echo " + mfb cmp                  : Binary comparaison between last execution and previous"
-        echo " + mfb diff                 : Shortenen diff between last and previous run"
-        echo " + mfb roll [yes|no]        : Rolling cmp on available outputs (continue or not if equal)"
+        echo " + mfb outputs              : List actual outputs directories"
       fi
     done
 
@@ -370,6 +360,7 @@ while [[ $# -gt 0 ]]; do
     this_value=$1
     shift
 
+    echo $this_var=$this_value
     export $this_var=$this_value
     set -- freeze
 
@@ -530,11 +521,11 @@ while [[ $# -gt 0 ]]; do
 
   elif [ "$mfb" == "flat-bundle" ]; then
 
-    exec bundle_inspect.py --flat
+    exec bundle.py --flat
 
   elif [ "$mfb" == "show-bundle" ]; then
 
-    exec bundle_inspect.py --conf
+    exec bundle.py --conf
 
   elif [ "$mfb" == "bundle" ]; then
 
@@ -554,9 +545,9 @@ while [[ $# -gt 0 ]]; do
     this_todo=$1
     shift
 
-    bundle_items=$(bundle_inspect.py --flat)
+    bundle_items=$(bundle.py --flat)
     bundle_items=${bundle_items// /:}
-    bundle_types=$(bundle_inspect.py --list)
+    bundle_types=$(bundle.py --list)
     bundle_types=${bundle_types// /:}
 
     while [[ $# -gt 0 ]]; do
@@ -565,7 +556,7 @@ while [[ $# -gt 0 ]]; do
         this_type=$1
         shift
         echo "Insert all '$this_type' type items"
-        set -- $(bundle_inspect.py --type $this_type) $*
+        set -- $(bundle.py --type $this_type) $*
       fi
 
       if [[ ! ":$bundle_items:" == *":$1:"* ]]; then
@@ -580,7 +571,7 @@ while [[ $# -gt 0 ]]; do
         unset $fpvar
       done
 
-      bundle_inspect.py --item $this_item > $MFBENCH_STORE/$this_todo.current
+      bundle.py --item $this_item > $MFBENCH_STORE/$this_todo.current
       if [[ $? != 0 ]]; then
         echo "Unable to set env for $this_todo of $this_item"
         break
@@ -743,7 +734,7 @@ while [[ $# -gt 0 ]]; do
     export MFBENCH_MAINPACK=$MFBENCH_PACK
 
     if [ "$MFBENCH_AUTOPACK" == "yes" ]; then
-      set -- freeze icsupd install $(bundle_inspect.py --type hub) $(bundle_inspect.py --type main)
+      set -- freeze icsupd install $(bundle.py --type hub) $(bundle.py --type main)
     else
       set -- freeze icsupd
     fi
@@ -819,7 +810,7 @@ while [[ $# -gt 0 ]]; do
     fi
 
     \cd $MFBENCH_ROOTPACK/$MFBENCH_PACK
-    for compile_func in $(declare -F | fgrep mfbench_compile_ | cut -d " " -f3); do
+    for compile_func in $(declare -F | fgrep mfbench_compile_ | cut -d " " -f3 | sort -u); do
       echo "Apply function $compile_func..."
       $compile_func
     done
@@ -828,33 +819,47 @@ while [[ $# -gt 0 ]]; do
 
     source $MFBENCH_SCRIPTS_WRAPPERS/setup_compilers.sh
 
-  elif [ "$mfb" == "compile" ]; then
+  elif [ "$mfb" == "build" ]; then
 
     if [ "$MFBENCH_PACK" == "" ]; then
       mandatory_var_raw arch opts
       export MFBENCH_PACK=$(\ls -tr1d *.*.$MFBENCH_ARCH.$MFBENCH_OPTS | tail -1)
     fi
 
+    if [ "$MFBENCH_FUNCTIONS_COMPILE" != "true" ]; then
+      source $MFBENCH_SCRIPTS/functions/compile.sh
+    fi
+
     source $MFBENCH_SCRIPTS_WRAPPERS/setup_compilers.sh
 
     \cd $MFBENCH_ROOTPACK/$MFBENCH_PACK
     pwd
-    \rm -f compile.log
+
+    build_prefix=$1
+    shift
 
     [[ $# -eq 0 ]] && set -- $(cat $MFBENCH_CONF/gmkpack-packages $MFBENCH_CONF/gmkpack-binaries)
 
     while [[ $# -gt 0 ]]; do
-      ics_builder="ics_$1"
+      this_builder="${build_prefix}_$1"
       shift
-      if [ -f $ics_builder ]; then
-        echo "Build $ics_builder"
-        [[ "$tempo_fake" != "true" ]] && ./$ics_builder 2>&1 | tee $ics_builder.log
+      if [ -f $this_builder ]; then
+        echo "Build $this_builder"
+        [[ "$tempo_fake" != "true" ]] && ./$this_builder 2>&1 | tee $(mfbench_logfile $this_builder)
       else
-        echo "No such builder: $ics_builder" >&2
+        echo "No such builder: $this_builder" >&2
       fi
     done
 
     [[ -d hub/local/build ]] && \rm -rf hub/local/build
+
+  elif [ "$mfb" == "compile" ]; then
+
+    set -- build ics $*
+
+  elif [ "$mfb" == "load" ]; then
+
+    set -- build ild $*
 
   elif [ "$mfb" == "clean" ]; then
 
@@ -862,6 +867,22 @@ while [[ $# -gt 0 ]]; do
     \cd $MFBENCH_ROOTPACK/$MFBENCH_PACK
     cleanpack
     resetpack
+
+  elif [ "$mfb" == "inputs" ]; then
+
+    echo "TODO..."
+
+  elif [ "$mfb" == "play" ]; then
+
+    echo "TODO..."
+
+  elif [ "$mfb" == "redo" ]; then
+
+    set -- compile play
+
+  elif [ "$mfb" == "outputs" ]; then
+
+    echo "TODO..."
 
   elif [ "$mfb" == "tube" ]; then
 

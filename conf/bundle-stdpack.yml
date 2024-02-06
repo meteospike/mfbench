@@ -26,8 +26,8 @@ tools:
 libraries:
 
     eccodes:
-        version : '2.30.2'
-        topdir  : eccodes-2.30.2-Source
+        version : '2.27.0'
+        topdir  : eccodes-2.27.0-Source
 
     hdf5:
         version : '1.10.11'
@@ -53,13 +53,13 @@ hub:
         gmkpack : 'hub/local/src/OOPS'
 
     fiat:
-        git     : https://github.com/pmarguinaud/fiat.git
-        version : nvtx+single_prec
+        git     : https://github.com/RyadElKhatibMF/fiat.git
+        version : khatib_fiat-mirror-CY49_aurora
         gmkpack : 'hub/local/src/Fiat'
 
     ectrans:
-        git     : https://github.com/ACCORD-NWP/ectrans.git
-        version : mirror-CY48T3_mrg48R1.02
+        git     : https://github.com/RyadElKhatibMF/ectrans.git
+        version : khatib_ectrans-mirror-CY49_allfttw
         gmkpack : 'hub/local/src/Ectrans'
 
     ecbuild:
@@ -146,7 +146,7 @@ dummy:
 
     bufr:
         name    : bufr
-        skip    : rsmkp_ grsrnd_
+        skip    : grsmkp_ grsrnd_
         abort   : >
                   abortx_ addFile addRead addWrite adjustGridAreaDefinition allocateMemory
                   bbuprs0_ bbuprs1_ bbuprs2_ bbuprs3_ bbuprt_ bbuprtbox_ bfkey_ bfprs2_

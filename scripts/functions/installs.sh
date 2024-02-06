@@ -130,7 +130,7 @@ function mfbench_install_generic ()
 function mfbench_install_dummy ()
 {
   \cd $MFBENCH_BUILD
-  bundle_inspect.py --load $MFBENCH_INSTALL_NAME | tee bundle_load.$MFBENCH_INSTALL_NAME.log
+  bundle.py --load $MFBENCH_INSTALL_NAME | tee bundle_load.$MFBENCH_INSTALL_NAME.log
   this_src=$(head -1 bundle_load.$MFBENCH_INSTALL_NAME.log)
   if [ -f "$this_src" ]; then
     $MFBENCH_COMPILER_CC -c $this_src

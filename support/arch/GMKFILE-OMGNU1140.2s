@@ -30,7 +30,7 @@ LNK_MPCCNATIVE =
 # fypp preprocessor
 # -----------------
 
-GMK_FYPP = $MFBENCH_INSTALL/tools/yaml/fypp/bin/fypp
+GMK_FYPP = $MFBENCH_INSTALL/tools/fypp/bin/fypp
 
 # fypp preprocessor background flags
 # ----------------------------------
@@ -50,7 +50,7 @@ GPU = none
 # Basic compilation flags
 # -----------------------
 
-FRTFLAGS = -c -fconvert=swap -fno-second-underscore -fbacktrace -m64 -fopenmp -ffree-line-length-none -fno-sign-zero -fpic -fcray-pointer -fno-range-check -g -pipe -Wall
+FRTFLAGS = -c -fconvert=swap -fno-second-underscore -fbacktrace -m64 -fopenmp -ffree-line-length-none -fno-sign-zero -fpic -fcray-pointer -fno-range-check -g -pipe -fallow-argument-mismatch -fallow-invalid-boz -Wall
 VCCFLAGS = -c -m64 -fopenmp -fpic -g -pipe -Wall
 # Option -C in order to create files without compiling inside odb98
 # In order to have any effect from the following -1 or -A options,
@@ -128,8 +128,8 @@ GMK_CFLAGS_ODB = -DSTATIC_LINKING -DXPRIVATE=PRIVATE -DINTERCEPT_ALLOC -DUSE_ALL
 GMK_FCFLAGS_ODB = -DHAS_MAGICS -DNEW_MAGICS
 GMK_CFLAGS_BLACKLIST = -DSTATIC_LINKING -DXPRIVATE=PRIVATE -DINTERCEPT_ALLOC -DUSE_ALLOCA_H
 
-GMK_FCFLAGS_TRANS = -DWITH_FFTW
-GMK_FCFLAGS_ETRANS = -DWITH_FFTW
+GMK_FCFLAGS_TRANS =
+GMK_FCFLAGS_ETRANS =
 
 # Fortran (cross-)linker
 # ----------------------
@@ -144,17 +144,17 @@ LNK_MPI = $MFBENCH_COMPILER_MPIF90
 # cc (cross-)linker
 # -----------------
 
-LNK_CC =  $MFBENCH_COMPILER_MPICC -ldl -lrt -fopenmp
+LNK_CC =  $MFBENCH_COMPILER_MPICC -ldl -lrt -lstdc++ -fopenmp
 
 # CXX (cross-)linker (for mixed langages c++ and fortran)
 # -------------------------------------------------------
 
-LNK_CXX = $MFBENCH_COMPILER_MPICXX
+LNK_CXX = $MFBENCH_COMPILER_MPICXX -lstdc++
 
 # Fortran linking flags
 # ----------------------
 
-LNK_FLAGS = -fopenmp -ffast-math -ldl -lrt -Wl,-rpath,$MFBENCH_INSTALL/$MFBENCH_ARCH/lib
+LNK_FLAGS = -fopenmp -ffast-math -ldl -lrt -lstdc++ -Wl,-rpath,$MFBENCH_INSTALL/$MFBENCH_ARCH/lib
 
 # Additional linking flags to LNK_FLAGS for c++ executable
 # --------------------------------------------------------
@@ -237,54 +237,71 @@ GMK_CMAKE_oops_src = -Wno-deprecated -Wno-dev -DCMAKE_C_COMPILER=\${VCCNAME} -DC
 
 GMK_CMAKE_atlas = -Wno-deprecated -Wno-dev -DCMAKE_C_COMPILER=\${VCCNAME} -DCMAKE_C_FLAGS=\"${VCCFLAGS} ${OPT_VCCFLAGS}\" -DCMAKE_CXX_COMPILER=\${CXXNAME} -DCMAKE_CXX_FLAGS=\"${VCCFLAGS} ${OPT_VCCFLAGS} ${MACROS_CXX}\" -DCMAKE_Fortran_COMPILER=\${FRTNAME} -DATLAS_Fortran_FLAGS=\"${FRTFLAGS} ${OPT_FRTFLAGS}\" -DCMAKE_BUILD_TYPE=NONE -Decbuild_ROOT=\${TARGET_PACK}/\${GMK_HUB_DIR}/\${GMK_LAST_HUB_BRANCH}/\${GMKSRC}/ecSDK -DCMAKE_PREFIX_PATH=\${TARGET_PACK}/\${GMK_HUB_DIR}/\${GMK_LAST_HUB_BRANCH}/\${GMK_HUB_INSTALL}/ecSDK -DENABLE_TESTS=ON -DBUILD_SHARED_LIBS=OFF -DECBUILD_2_COMPAT_DEPRECATE=OFF
 
-GMK_CMAKE_fiat = -Wno-deprecated -Wno-dev -DCMAKE_C_COMPILER=\${VCCNAME} -DCMAKE_C_FLAGS=\"${VCCFLAGS} ${OPT_VCCFLAGS} ${MACROS_CC} -lm\" -DCMAKE_CXX_COMPILER=\${CXXNAME} -DCMAKE_CXX_FLAGS=\"${VCCFLAGS} ${OPT_VCCFLAGS} -lm ${MACROS_CXX}\" -DCMAKE_Fortran_COMPILER=\${FRTNAME} -DCMAKE_Fortran_FLAGS=\"${FRTFLAGS} ${OPT_FRTFLAGS} ${MACROS_FRT}\" -DCMAKE_BUILD_TYPE=NONE -Decbuild_ROOT=\${TARGET_PACK}/\${GMK_HUB_DIR}/\${GMK_LAST_HUB_BRANCH}/\${GMKSRC}/ecSDK -DBUILD_SHARED_LIBS=BOTH -DENABLE_TESTS=ON -DECBUILD_2_COMPAT_DEPRECATE=OFF -DENABLE_DOUBLE_PRECISION=OFF -DENABLE_DUMMY_MPI_HEADER=OFF
+GMK_CMAKE_fiat = -Wno-deprecated -Wno-dev -DCMAKE_C_COMPILER=\${VCCNAME} -DCMAKE_C_FLAGS=\"${VCCFLAGS} ${OPT_VCCFLAGS} ${MACROS_CC} -lm\" -DCMAKE_CXX_COMPILER=\${CXXNAME} -DCMAKE_CXX_FLAGS=\"${VCCFLAGS} ${OPT_VCCFLAGS} -lm ${MACROS_CXX}\" -DCMAKE_Fortran_COMPILER=\${FRTNAME} -DCMAKE_Fortran_FLAGS=\"${FRTFLAGS} ${OPT_FRTFLAGS} ${MACROS_FRT}\" -DCMAKE_BUILD_TYPE=NONE -Decbuild_ROOT=\${TARGET_PACK}/\${GMK_HUB_DIR}/\${GMK_LAST_HUB_BRANCH}/\${GMKSRC}/ecSDK -DBUILD_SHARED_LIBS=BOTH -DENABLE_TESTS=ON -DECBUILD_2_COMPAT_DEPRECATE=OFF -DENABLE_SINGLE_PRECISION=ON -DENABLE_DOUBLE_PRECISION=OFF -DENABLE_DUMMY_MPI_HEADER=OFF
 
-GMK_CMAKE_ectrans = -Wno-deprecated -Wno-dev -DCMAKE_C_COMPILER=\${VCCNAME} -DCMAKE_C_FLAGS=\"${VCCFLAGS} ${OPT_VCCFLAGS}\" -DCMAKE_CXX_COMPILER=\${CXXNAME} -DCMAKE_CXX_FLAGS=\"${VCCFLAGS} ${OPT_VCCFLAGS} ${MACROS_CXX}\" -DCMAKE_Fortran_COMPILER=\${FRTNAME} -DCMAKE_Fortran_FLAGS=\"${FRTFLAGS} ${OPT_FRTFLAGS} ${MACROS_FRT}\" -DCMAKE_BUILD_TYPE=NONE -Decbuild_ROOT=\${TARGET_PACK}/\${GMK_HUB_DIR}/\${GMK_LAST_HUB_BRANCH}/\${GMKSRC}/ecSDK -Dfiat_ROOT=\${TARGET_PACK}/\${GMK_HUB_DIR}/\${GMK_LAST_HUB_BRANCH}/\${GMK_HUB_INSTALL}/Fiat -DENABLE_TRANSI=OFF -DBUILD_SHARED_LIBS=OFF -DENABLE_TESTS=ON -DFFTW_ROOT=\${FFTW_INSTALLDIR} -DECBUILD_2_COMPAT_DEPRECATE=OFF -DENABLE_DOUBLE_PRECISION=OFF -DENABLE_GPU=OFF -DCMAKE_PREFIX_PATH=$MFBENCH_COMPILER_INSTALL
+GMK_CMAKE_ectrans = -Wno-deprecated -Wno-dev -DCMAKE_C_COMPILER=\${VCCNAME} -DCMAKE_C_FLAGS=\"${VCCFLAGS} ${OPT_VCCFLAGS}\" -DCMAKE_CXX_COMPILER=\${CXXNAME} -DCMAKE_CXX_FLAGS=\"${VCCFLAGS} ${OPT_VCCFLAGS} ${MACROS_CXX}\" -DCMAKE_Fortran_COMPILER=\${FRTNAME} -DCMAKE_Fortran_FLAGS=\"${FRTFLAGS} ${OPT_FRTFLAGS} ${MACROS_FRT}\" -DCMAKE_BUILD_TYPE=NONE -Decbuild_ROOT=\${TARGET_PACK}/\${GMK_HUB_DIR}/\${GMK_LAST_HUB_BRANCH}/\${GMKSRC}/ecSDK -Dfiat_ROOT=\${TARGET_PACK}/\${GMK_HUB_DIR}/\${GMK_LAST_HUB_BRANCH}/\${GMK_HUB_INSTALL}/Fiat -DENABLE_TRANSI=OFF -DBUILD_SHARED_LIBS=OFF -DENABLE_TESTS=ON -DECBUILD_2_COMPAT_DEPRECATE=OFF -DENABLE_SINGLE_PRECISION=ON -DENABLE_DOUBLE_PRECISION=OFF -DENABLE_GPU=OFF -DCMAKE_PREFIX_PATH=$MFBENCH_COMPILER_INSTALL
 
-GMK_CMAKE_field_api = -Wno-deprecated -Wno-dev -DCMAKE_C_COMPILER=\${VCCNAME} -DCMAKE_C_FLAGS=\"${VCCFLAGS} ${OPT_VCCFLAGS}\" -DCMAKE_Fortran_COMPILER=\${FRTNAME} -DCMAKE_Fortran_FLAGS=\"${FRTFLAGS} ${OPT_FRTFLAGS} ${MACROS_FRT}\" -DCMAKE_BUILD_TYPE=NONE -Decbuild_ROOT=\${TARGET_PACK}/\${GMK_HUB_DIR}/\${GMK_LAST_HUB_BRANCH}/\${GMKSRC}/ecSDK -Dfiat_ROOT=\${TARGET_PACK}/\${GMK_HUB_DIR}/\${GMK_LAST_HUB_BRANCH}/\${GMK_HUB_INSTALL}/Fiat -DBUILD_SHARED_LIBS=OFF -DENABLE_ACC=OFF -DENABLE_DOUBLE_PRECISION=OFF
+GMK_CMAKE_field_api = -Wno-deprecated -Wno-dev -DCMAKE_C_COMPILER=\${VCCNAME} -DCMAKE_C_FLAGS=\"${VCCFLAGS} ${OPT_VCCFLAGS}\" -DCMAKE_Fortran_COMPILER=\${FRTNAME} -DCMAKE_Fortran_FLAGS=\"${FRTFLAGS} ${OPT_FRTFLAGS} ${MACROS_FRT}\" -DCMAKE_BUILD_TYPE=NONE -Decbuild_ROOT=\${TARGET_PACK}/\${GMK_HUB_DIR}/\${GMK_LAST_HUB_BRANCH}/\${GMKSRC}/ecSDK -Dfiat_ROOT=\${TARGET_PACK}/\${GMK_HUB_DIR}/\${GMK_LAST_HUB_BRANCH}/\${GMK_HUB_INSTALL}/Fiat -DBUILD_SHARED_LIBS=OFF -DENABLE_ACC=OFF -DENABLE_SINGLE_PRECISION=ON -DENABLE_DOUBLE_PRECISION=OFF
 
 # User libraries (absolute filename or short name) :
 # ------------------------------------------------
 
 # "Read Grib from BDAP":
 LD_USR01 = $MFBENCH_INSTALL/$MFBENCH_ARCH/lib/librgb.a
+
 # "Bufr decoding":
 LD_USR02 = $MFBENCH_INSTALL/$MFBENCH_ARCH/lib/libbufr.a
+
 # "ec":
 LD_USR03 =
+
 # "Gribex (or emos)":
 LD_USR04 = $MFBENCH_INSTALL/$MFBENCH_ARCH/lib/libgribex.a
+
 # "ecmwf field database":
 LD_USR05 = $MFBENCH_INSTALL/$MFBENCH_ARCH/lib/libdummy_fdb.a
+
 # "ecmwf wave model":
 LD_USR06 = $MFBENCH_INSTALL/$MFBENCH_ARCH/lib/libdummy_wam.a
+
 # "C code generated by blacklist":
 LD_USR07 =
+
 # "Nag":
 LD_USR08 = $MFBENCH_INSTALL/$MFBENCH_ARCH/lib/libdummy_naglite.a
+
 # "OASIS":
 LD_USR09 = $MFBENCH_INSTALL/$MFBENCH_ARCH/lib/libdummy_oasis.a
+
 # "Grib_api":
 LD_USR_GRIB_API_F90 = $MFBENCH_INSTALL/$MFBENCH_ARCH/lib/libeccodes_f90.so
 LD_USR_GRIB_API = $MFBENCH_INSTALL/$MFBENCH_ARCH/lib/libeccodes.so
+
 # "JPEG library":
 LD_USR_JPEG =
+
 # "EECFI" for aeolus:
 LD_USR_EECFI =
+
 # "Netcdf :"
 LD_USR_NETCDF_F = $MFBENCH_INSTALL/$MFBENCH_ARCH/lib/libnetcdff.so
 LD_USR_NETCDF = $MFBENCH_INSTALL/$MFBENCH_ARCH/lib/libnetcdf.so
+
 # "HDF5" :
 LD_USR_HDF5_HLFORTRAN = $MFBENCH_INSTALL/$MFBENCH_ARCH/lib/libhdf5_hl_fortran.a
 LD_USR_HDF5_FORTRAN = $MFBENCH_INSTALL/$MFBENCH_ARCH/lib/libhdf5_fortran.a
 LD_USR_HDF5 = $MFBENCH_INSTALL/$MFBENCH_ARCH/lib/libhdf5.a
+
 # "Meteo-France dummies library (IFS only):"
 LD_USR_MF_DUMMY =
+
 # "Magics :"
 LD_USR_MAGPLUS = MagPlus
 LD_USR_MAGICS = MagPlusSingle
+
 # "xml :"
 LD_USR_XML =
+
 # "Boost" :
 LD_USR_BOOST_UNIT_TEST_FRAMEWORK = boost_unit_test_framework
 
@@ -293,20 +310,28 @@ LD_USR_BOOST_UNIT_TEST_FRAMEWORK = boost_unit_test_framework
 LD_USR_FCKIT = fckit
 LD_USR_ECKIT_MPI = eckit_mpi
 LD_USR_ECKIT = eckit
+
 # "OOPS" :
 LD_USR_OOPS = oops
+
 # "OOPS-neural" :
 LD_USR_OOPS_NEURAL = neural
+
 # "Atlas" :
 LD_USR_ATLAS_F = atlas_f
+
 # parkind :
 LD_USR_PARKIND = parkind_sp
+
 # fiat :
 LD_USR_FIAT = fiat
+
 # mpi_serial :
 LD_USR_MPI_SERIAL = mpi_serial
+
 # ectrans :
 LD_USR_ECTRANS = trans_sp
+
 # field_api :
 LD_USR_FIELD_API = field_api_sp
 
@@ -315,15 +340,16 @@ LD_USR_FIELD_API = field_api_sp
 
 # Lapack:
 LD_LANG01 = $MFBENCH_INSTALL/$MFBENCH_ARCH/lib/liblapack.so
+
 # Blas:
 LD_LANG02 = $MFBENCH_INSTALL/$MFBENCH_ARCH/lib/libblas.so
 
 # System-dependent libraries - ALWAYS LOADED - (absolute filename or short name) :
 # ------------------------------------------------------------------------------
 
-LD_SYS01 = fftw3f
-LD_SYS02 = ibmdummy
-LD_SYS03 = stdc++
+LD_SYS01 = $MFBENCH_INSTALL/$MFBENCH_ARCH/lib/libdummy_ibm.a
+LD_SYS02 = stdc++
+LD_SYS03 =
 LD_SYS04 =
 LD_SYS05 =
 
