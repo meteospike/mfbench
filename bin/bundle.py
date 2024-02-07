@@ -6,8 +6,11 @@ import os
 import io
 import sys
 import argparse
-import yaml
-
+try:
+    import yaml
+except ModuleNotFoundError:
+    print("yaml")
+    exit(1)
 
 parser = argparse.ArgumentParser(
     prog = 'bundle',

@@ -59,7 +59,7 @@ function mfbench_logfile ()
 
 if [[ $# == 0 ]]; then
     set -- help
-elif [[ "$1" != "init" && "$1" != "on" ]]; then
+elif [[ "$1" != "init" && "$1" != "on" && "$1" != "linkable" ]]; then
   if [ "$MFBENCH_ROOT" == "" ]; then
     set -- on $*
   fi
@@ -95,7 +95,7 @@ while [[ $# -gt 0 ]]; do
         echo " + mfb unset [vars]         : Unset the specified env variables"
         echo " + mfb path                 : Display actual internal path"
         echo " + mfb list [all|items]     : List any mfbench directory"
-        echo " + mfb store                : List contents of the mfbench inteernal store directory"
+        echo " + mfb store                : List contents of the mfbench internal store directory"
       fi
 
       if [ "$chapter" = "install" ]; then
@@ -152,6 +152,10 @@ while [[ $# -gt 0 ]]; do
   elif [ "$mfb" == "version" ]; then
 
     cat $MFBENCH_ROOT/VERSION
+
+  elif [ "$mfb" == "linkable" ]; then
+
+    echo $(fgrep mfbench_mkdir_ln $0 | fgrep -v fgrep | sed 's/^\s*//' | cut -d " " -f2)
 
   elif [ "$mfb" == "init" ]; then
 
@@ -620,8 +624,12 @@ while [[ $# -gt 0 ]]; do
         break
       fi
 
-      cat $MFBENCH_STORE/$this_todo.current
-      set -a; source $MFBENCH_STORE/$this_todo.current; set +a
+      if [ $(wc -l $MFBENCH_STORE/$this_todo.current | cut -d " " -f1) -gt 2 ]; then
+        cat $MFBENCH_STORE/$this_todo.current
+        set -a; source $MFBENCH_STORE/$this_todo.current; set +a
+      else
+        export MFBENCH_INSTALL_TARGET=$MFBENCH_INSTALL/tools
+      fi
       \rm -rf $MFBENCH_STORE/$this_todo.current
 
       [[ "$MFBENCH_INSTALL_MKARCH"  == "yes" ]] && mandatory_var_msg "$this_todo '$this_item'" arch opts
@@ -639,12 +647,14 @@ while [[ $# -gt 0 ]]; do
         mkdir -p $MFBENCH_INSTALL_TARGET
       fi
 
-      source $MFBENCH_SCRIPTS_WRAPPERS/setup_compilers.sh
-      export CC=$MFBENCH_COMPILER_CC
-      export FC=$MFBENCH_COMPILER_F90
-      export CXX=$MFBENCH_COMPILER_CXX
-      export F90=$MFBENCH_COMPILER_F90
-      export F77=$MFBENCH_COMPILER_F90
+      if [ "$MFBENCH_INSTALL_MKARCH"  == "yes" ]; then
+        source $MFBENCH_SCRIPTS_WRAPPERS/setup_compilers.sh
+        export CC=$MFBENCH_COMPILER_CC
+        export FC=$MFBENCH_COMPILER_F90
+        export CXX=$MFBENCH_COMPILER_CXX
+        export F90=$MFBENCH_COMPILER_F90
+        export F77=$MFBENCH_COMPILER_F90
+      fi
 
       this_under=${this_item//-/_}
       mfbench_${this_todo}_track_in $this_under
@@ -689,7 +699,7 @@ while [[ $# -gt 0 ]]; do
   elif [ "$mfb" == "installed" ]; then
 
     \cd $MFBENCH_PROFDIR
-    \ls -1 track.* | cut -f2 -d "."
+    \ls -1 track.* 2>/dev/null | cut -f2 -d "."
 
   elif [ "$mfb" == "track" ]; then
 
