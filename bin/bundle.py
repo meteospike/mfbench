@@ -67,58 +67,59 @@ elif opts.load:
                 fld.write(f'void {this_entry} () {{ }}\n')
     else:
         sys.stderr.write(f"Dummy '{opts.load}' not defined\n")
-elif skip_yaml:
-    print('MFBENCH_INSTALL_TARGET=$MFBENCH_INSTALL/tools')
-    print('MFBENCH_INSTALL_MKARCH=no')
-    print('MFBENCH_INSTALL_GMKPACK=no')
 else:
-    for bdle_type in bdle_entries:
-        if bdle_dict[bdle_type]:
-            bdle_flat.extend(bdle_dict[bdle_type].keys())
-        if opts.item:
-            if bdle_dict[bdle_type] and opts.item in bdle_dict[bdle_type]:
-                if bdle_type == 'tools':
-                    print('MFBENCH_INSTALL_MKARCH=no')
-                else:
-                    print('MFBENCH_INSTALL_MKARCH=yes')
-                this_bdle = bdle_dict[bdle_type][opts.item]
-                print(f'MFBENCH_INSTALL_NAME={opts.item}')
-                print(f'MFBENCH_INSTALL_TYPE={bdle_type}')
-                actual_threads  = this_bdle.get('threads', '4')
-                print(f'MFBENCH_INSTALL_THREADS={actual_threads}')
-                if 'version' in this_bdle:
-                    print(f'MFBENCH_INSTALL_VERSION="{this_bdle["version"]}"')
-                else:
-                    print('MFBENCH_INSTALL_VERSION=""')
-                if 'git' in this_bdle:
-                    actual_topdir  = this_bdle.get('topdir', opts.item)
-                    print(f'MFBENCH_INSTALL_TOPDIR={actual_topdir}')
-                    print(f'MFBENCH_INSTALL_GIT={this_bdle["git"]}')
-                elif bdle_type == 'dummy':
-                    pass
-                else:
-                    actual_topdir  = this_bdle.get('topdir', opts.item + '-' + this_bdle['version'])
-                    actual_archive = this_bdle.get('archive', 'tar.gz')
-                    actual_source  = this_bdle.get('source', actual_topdir) + '.' + actual_archive
-                    print(f'MFBENCH_INSTALL_TOPDIR={actual_topdir}')
-                    print(f'MFBENCH_INSTALL_SOURCE={actual_source}')
-                if 'gmkpack' in this_bdle:
-                    print('MFBENCH_INSTALL_GMKPACK=yes')
-                    print(f'MFBENCH_INSTALL_TARGET=$MFBENCH_ROOTPACK/$MFBENCH_PACK/{this_bdle["gmkpack"]}')
-                else:
-                    print('MFBENCH_INSTALL_GMKPACK=no')
-                    if bdle_type.startswith('lib'):
-                        print('MFBENCH_INSTALL_TARGET=$MFBENCH_INSTALL/$MFBENCH_ARCH')
-                    elif bdle_type == 'dummy':
-                        print('MFBENCH_INSTALL_TARGET=$MFBENCH_INSTALL/$MFBENCH_ARCH/lib')
-                    else:
-                        print(f'MFBENCH_INSTALL_TARGET=$MFBENCH_INSTALL/{bdle_type}')
-        elif opts.conf:
+    if skip_yaml:
+      print('MFBENCH_INSTALL_TARGET=$MFBENCH_INSTALL/tools')
+      print('MFBENCH_INSTALL_MKARCH=no')
+      print('MFBENCH_INSTALL_GMKPACK=no')
+    else:
+        for bdle_type in bdle_entries:
             if bdle_dict[bdle_type]:
-                bdle_items = ' '.join(sorted(bdle_dict[bdle_type].keys()))
-            else:
-                bdle_items = ''
-            print(f'{bdle_type}:{bdle_items}')
+                bdle_flat.extend(bdle_dict[bdle_type].keys())
+            if opts.item:
+                if bdle_dict[bdle_type] and opts.item in bdle_dict[bdle_type]:
+                    if bdle_type == 'tools':
+                        print('MFBENCH_INSTALL_MKARCH=no')
+                    else:
+                        print('MFBENCH_INSTALL_MKARCH=yes')
+                    this_bdle = bdle_dict[bdle_type][opts.item]
+                    print(f'MFBENCH_INSTALL_NAME={opts.item}')
+                    print(f'MFBENCH_INSTALL_TYPE={bdle_type}')
+                    actual_threads  = this_bdle.get('threads', '4')
+                    print(f'MFBENCH_INSTALL_THREADS={actual_threads}')
+                    if 'version' in this_bdle:
+                        print(f'MFBENCH_INSTALL_VERSION="{this_bdle["version"]}"')
+                    else:
+                        print('MFBENCH_INSTALL_VERSION=""')
+                    if 'git' in this_bdle:
+                        actual_topdir  = this_bdle.get('topdir', opts.item)
+                        print(f'MFBENCH_INSTALL_TOPDIR={actual_topdir}')
+                        print(f'MFBENCH_INSTALL_GIT={this_bdle["git"]}')
+                    elif bdle_type == 'dummy':
+                        pass
+                    else:
+                        actual_topdir  = this_bdle.get('topdir', opts.item + '-' + this_bdle['version'])
+                        actual_archive = this_bdle.get('archive', 'tar.gz')
+                        actual_source  = this_bdle.get('source', actual_topdir) + '.' + actual_archive
+                        print(f'MFBENCH_INSTALL_TOPDIR={actual_topdir}')
+                        print(f'MFBENCH_INSTALL_SOURCE={actual_source}')
+                    if 'gmkpack' in this_bdle:
+                        print('MFBENCH_INSTALL_GMKPACK=yes')
+                        print(f'MFBENCH_INSTALL_TARGET=$MFBENCH_ROOTPACK/$MFBENCH_PACK/{this_bdle["gmkpack"]}')
+                    else:
+                        print('MFBENCH_INSTALL_GMKPACK=no')
+                        if bdle_type.startswith('lib'):
+                            print('MFBENCH_INSTALL_TARGET=$MFBENCH_INSTALL/$MFBENCH_ARCH')
+                        elif bdle_type == 'dummy':
+                            print('MFBENCH_INSTALL_TARGET=$MFBENCH_INSTALL/$MFBENCH_ARCH/lib')
+                        else:
+                            print(f'MFBENCH_INSTALL_TARGET=$MFBENCH_INSTALL/{bdle_type}')
+            elif opts.conf:
+                if bdle_dict[bdle_type]:
+                    bdle_items = ' '.join(sorted(bdle_dict[bdle_type].keys()))
+                else:
+                    bdle_items = ''
+                print(f'{bdle_type}:{bdle_items}')
 
 if opts.flat:
     print(' '.join(sorted(bdle_flat)))
