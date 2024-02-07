@@ -360,7 +360,7 @@ LD_MPI01 =
 LD_MPI02 =
 LD_MPI03 =
 
-LD_MPI_DUMMY = mpidummy
+LD_MPI_DUMMY = dummy_mpi
 
 # Precompiler libraries
 # ---------------------

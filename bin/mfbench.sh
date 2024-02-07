@@ -170,7 +170,7 @@ while [[ $# -gt 0 ]]; do
 
     export MFBENCH_STORE=$MFBENCH_ROOT/.mfb
     if [ ! -d $MFBENCH_STORE ]; then
-      echo "Create local store $MFBENCH_STORE"
+      echo "Create store directory: $MFBENCH_STORE"
       mkdir $MFBENCH_STORE
     fi
 
@@ -217,13 +217,13 @@ while [[ $# -gt 0 ]]; do
     export MFBENCH_SOURCES=${MFBENCH_SOURCES:-$MFBENCH_ROOT/sources}
     mfbench_mkdir_ln sources $MFBENCH_ROOT
 
-    export MFBENCH_DATA=$MFBENCH_ROOT/data
-    mfbench_mkdir data
-
     export MFBENCH_SUPPORT=$MFBENCH_ROOT/support
     export MFBENCH_SUPPORT_ARCH=$MFBENCH_SUPPORT/arch
     export MFBENCH_SUPPORT_LINK=$MFBENCH_SUPPORT/link
     mfbench_mkdir support
+
+    export MFBENCH_DATA=$MFBENCH_ROOT/data
+    mfbench_mkdir data
 
     export MFBENCH_INPUTS=${MFBENCH_INPUTS:-$MFBENCH_DATA/inputs}
     mfbench_mkdir_ln inputs $MFBENCH_DATA

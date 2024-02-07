@@ -4,7 +4,8 @@ export MFBENCH_FUNCTIONS_COMPILE=true
 
 function mfbench_compile_1_threads ()
 {
-  gmk_threads=${MFBENCH_THREADS:-$(cat $MFBENCH_CONF/gmkpack-threads)}
+  local gmk_threads=${MFBENCH_THREADS:-$(cat $MFBENCH_CONF/gmkpack-threads)}
+  local ics_file
   for ics_file in ics_*; do
     echo "Set GMK_THREADS=$gmk_threads for $PWD/$ics_file"
     perl -i -pe "
@@ -15,6 +16,7 @@ function mfbench_compile_1_threads ()
 
 function mfbench_compile_2_huboff ()
 {
+  local ics_file
   for ics_file in $(\ls -1 ics_* 2>/dev/null | fgrep -v ics_packages); do
     echo "Switch off hub for $PWD/$ics_file"
     perl -i -pe "
@@ -26,6 +28,7 @@ function mfbench_compile_2_huboff ()
 
 function mfbench_compile_3_mkild ()
 {
+  local ics_file
   for ics_file in $(\ls -1 ics_* 2>/dev/null | fgrep -v ics_packages); do
     ild_file=${ics_file//ics_/ild_}
     echo "Creating $PWD/$ild_file"

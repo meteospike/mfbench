@@ -18,6 +18,7 @@ function mfbench_mkdir_ln ()
   if [ ! -e "$2/$1" ]; then
     local dirkind="MFBENCH_${1^^}"
     local dirfull=${!dirkind}
+    echo "Link $dirfull -> $2/$1"
     \ln -s $dirfull $2/$1
   fi
 }

@@ -24,8 +24,8 @@ tools:
 libraries:
 
     eccodes:
-        version : '2.27.0'
-        topdir  : eccodes-2.27.0-Source
+        version : '2.30.2'
+        topdir  : eccodes-2.30.2-Source
 
     hdf5:
         version : '1.10.11'

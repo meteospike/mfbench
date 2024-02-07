@@ -27,6 +27,7 @@ function mfbench_uninstall_track_out ()
 {
   if [ -f $MFBENCH_PROFDIR/track.$1 ]; then
     \cd $MFBENCH_INSTALL_TARGET
+    local this_file
     for this_file in $(< $MFBENCH_PROFDIR/track.$1); do
       if [ -f $this_file ]; then
         echo "Removing file $this_file"
@@ -40,10 +41,11 @@ function mfbench_uninstall_track_out ()
 
 function mfbench_set_env ()
 {
-  this_name=$1
+  local this_name=$1
   shift
   \rm -f $MFBENCH_PROFDIR/env.install.$this_name
   touch $MFBENCH_PROFDIR/env.install.$this_name
+  local this_var
   for this_var in $*; do
     echo "$this_var=${!this_var}" >> $MFBENCH_PROFDIR/env.install.$this_name
   done
@@ -51,8 +53,8 @@ function mfbench_set_env ()
 
 function mfbench_set_path ()
 {
-  this_name=$1
-  this_path=$2
+  local this_name=$1
+  local this_path=$2
   if [[ ":$PATH:" == *":$this_path:"* ]]; then
     echo "PATH for '$this_name' already set"
   else
@@ -63,8 +65,8 @@ function mfbench_set_path ()
 
 function mfbench_set_python ()
 {
-  this_name=$1
-  this_path=$2
+  local this_name=$1
+  local this_path=$2
   if [[ ":$PYTHONPATH:" == *":$this_path:"* ]]; then
     echo "PYTHONPATH for '$this_name' already set"
   else
@@ -95,6 +97,7 @@ function mfbench_install_from_archive ()
 function mfbench_install_from_git ()
 {
   \cd $MFBENCH_INSTALL_TARGET
+  local git_select
   if [ "$MFBENCH_INSTALL_VERSION" == "" ]; then
     git_select=''
   else
@@ -131,7 +134,7 @@ function mfbench_install_dummy ()
 {
   \cd $MFBENCH_BUILD
   bundle.py --load $MFBENCH_INSTALL_NAME | tee bundle_load.$MFBENCH_INSTALL_NAME.log
-  this_src=$(head -1 bundle_load.$MFBENCH_INSTALL_NAME.log)
+  local this_src=$(head -1 bundle_load.$MFBENCH_INSTALL_NAME.log)
   if [ -f "$this_src" ]; then
     $MFBENCH_COMPILER_CC -c $this_src
     ar crv $MFBENCH_INSTALL_TARGET/$(basename $this_src .c).a $(basename $this_src .c).o
@@ -145,9 +148,10 @@ function mfbench_uninstall_dummy ()
 {
   \cd $MFBENCH_BUILD
   if [ -f bundle_load.$MFBENCH_INSTALL_NAME.log ]; then
-    this_src=$(head -1 bundle_load.$MFBENCH_INSTALL_NAME.log)
+    local this_src=$(head -1 bundle_load.$MFBENCH_INSTALL_NAME.log)
     echo "Removing bundle_load.$MFBENCH_INSTALL_NAME.log"
     \rm -f bundle_load.$MFBENCH_INSTALL_NAME.log
+    local this_file
     for this_file in $this_src $(basename $this_src .c).o $MFBENCH_INSTALL_TARGET/$(basename $this_src .c).a; do
       if [ -f "$this_file" ]; then
         echo "Removing $this_file"
@@ -217,6 +221,7 @@ function mfbench_post_install_generic_build ()
     \cd $this_build
     cmake ../$MFBENCH_INSTALL_TOPDIR -DCMAKE_INSTALL_PREFIX=$MFBENCH_INSTALL_TARGET $*
     make -j$MFBENCH_INSTALL_THREADS install
+    \rm -rf $this_build
   fi
 }
 
@@ -265,6 +270,7 @@ EOF
       echo "Creating directory $MFBENCH_SUPPORT/link"
       \mkdir -p $MFBENCH_SUPPORT/link
     fi
+    local binconf
     for binconf in $(< $MFBENCH_CONF/gmkpack-binaries); do
       \cp -r link/$binconf $MFBENCH_SUPPORT/link/
     done
@@ -287,18 +293,18 @@ function mfbench_post_install_ial ()
 {
   [[ ! -d $MFBENCH_INSTALL_TARGET ]] && \mkdir -p $MFBENCH_INSTALL_TARGET
 
-  local_name=$(basename $MFBENCH_INSTALL_TARGET)
+  local this_name=$(basename $MFBENCH_INSTALL_TARGET)
   \cd $(dirname $MFBENCH_INSTALL_TARGET)
 
   if [[ "$MFBENCH_INSTALL_GIT" == "" ]]; then
     echo "Move $MFBENCH_BUILD/$MFBENCH_INSTALL_TOPDIR as $MFBENCH_INSTALL_TARGET"
-    \rm -rf $local_name
-    \mv $MFBENCH_BUILD/$MFBENCH_INSTALL_TOPDIR $local_name
+    \rm -rf $this_name
+    \mv $MFBENCH_BUILD/$MFBENCH_INSTALL_TOPDIR $this_name
   else
-    echo "Move $local_name/$MFBENCH_INSTALL_NAME as $local_name"
-    \mv $local_name/$MFBENCH_INSTALL_NAME ..
-    \rmdir $local_name
-    \mv $MFBENCH_INSTALL_NAME $local_name
+    echo "Move $this_name/$MFBENCH_INSTALL_NAME as $this_name"
+    \mv $this_name/$MFBENCH_INSTALL_NAME ..
+    \rmdir $this_name
+    \mv $MFBENCH_INSTALL_NAME $this_name
   fi
 }
 
@@ -307,6 +313,7 @@ function mfbench_post_install_ial ()
 
 function mfbench_uninstall_generic ()
 {
+  local this_dir
   for this_dir in $(\ls -1d $MFBENCH_BUILD/$MFBENCH_INSTALL_TOPDIR* 2>/dev/null); do
     echo "Removing directory $this_dir"
     \rm -rf $this_dir
@@ -322,6 +329,7 @@ function mfbench_uninstall_generic ()
     echo "Removing link $MFBENCH_INSTALL_TARGET/$MFBENCH_INSTALL_NAME"
     \rm -f $MFBENCH_INSTALL_TARGET/$MFBENCH_INSTALL_NAME
   fi
+  local this_path
   for this_path in $(\ls $MFBENCH_PROFDIR/*.*.$MFBENCH_INSTALL_NAME 2>/dev/null); do
     echo "Removing file $this_path"
     \rm -f $this_path
