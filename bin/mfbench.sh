@@ -624,12 +624,8 @@ while [[ $# -gt 0 ]]; do
         break
       fi
 
-      if [ $(wc -l $MFBENCH_STORE/$this_todo.current | cut -d " " -f1) -gt 2 ]; then
-        cat $MFBENCH_STORE/$this_todo.current
-        set -a; source $MFBENCH_STORE/$this_todo.current; set +a
-      else
-        export MFBENCH_INSTALL_TARGET=$MFBENCH_INSTALL/tools
-      fi
+      cat $MFBENCH_STORE/$this_todo.current
+      set -a; source $MFBENCH_STORE/$this_todo.current; set +a
       \rm -rf $MFBENCH_STORE/$this_todo.current
 
       [[ "$MFBENCH_INSTALL_MKARCH"  == "yes" ]] && mandatory_var_msg "$this_todo '$this_item'" arch opts

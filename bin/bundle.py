@@ -7,10 +7,10 @@ import io
 import sys
 import argparse
 try:
+    skip_yaml = False
     import yaml
 except ModuleNotFoundError:
-    print("yaml")
-    exit(1)
+    skip_yaml = True
 
 parser = argparse.ArgumentParser(
     prog = 'bundle',
@@ -31,14 +31,23 @@ if os.environ['MFBENCH_CONF'] is None:
     sys.stderr.write('MFBENCH_CONF variable is not set\n')
     exit(1)
 
-with io.open(os.path.join(os.environ['MFBENCH_CONF'], opts.file), 'r') as fbdl:
-    bdle_dict = yaml.safe_load(fbdl)
+if skip_yaml:
+    bdle_dict = dict()
+else:
+    with io.open(os.path.join(os.environ['MFBENCH_CONF'], opts.file), 'r') as fbdl:
+        bdle_dict = yaml.safe_load(fbdl)
 
 bdle_entries = sorted(bdle_dict.keys())
-bdle_flat = list()
+if skip_yaml:
+    bdle_flat = [ 'yaml' ]
+else:
+    bdle_flat = list()
 
 if opts.list:
-    print(' '.join(bdle_entries))
+    if skip_yaml:
+        print('none')
+    else:
+        print(' '.join(bdle_entries))
 elif opts.type:
     if opts.type in bdle_dict:
         print(' '.join(sorted(bdle_dict[opts.type].keys())))
@@ -58,6 +67,10 @@ elif opts.load:
                 fld.write(f'void {this_entry} () {{ }}\n')
     else:
         sys.stderr.write(f"Dummy '{opts.load}' not defined\n")
+elif skip_yaml:
+    print('MFBENCH_INSTALL_TARGET=$MFBENCH_INSTALL/tools')
+    print('MFBENCH_INSTALL_MKARCH=no')
+    print('MFBENCH_INSTALL_GMKPACK=no')
 else:
     for bdle_type in bdle_entries:
         if bdle_dict[bdle_type]:
