@@ -68,7 +68,7 @@ elif opts.load:
     else:
         sys.stderr.write(f"Dummy '{opts.load}' not defined\n")
 else:
-    if skip_yaml:
+    if skip_yaml and opts.item:
       print('MFBENCH_INSTALL_TARGET=$MFBENCH_INSTALL/tools')
       print('MFBENCH_INSTALL_MKARCH=no')
       print('MFBENCH_INSTALL_GMKPACK=no')
