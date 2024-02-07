@@ -8,7 +8,6 @@ tools:
 
     fypp:
         git     : https://github.com/aradi/fypp.git
-        version : null
 
     vimpack:
         git     : https://github.com/pmarguinaud/vimpack.git
@@ -16,7 +15,6 @@ tools:
 
     yaml:
         git     : https://github.com/yaml/pyyaml.git
-        version : null
 
     gmkpack:
         version : '6.9.7'

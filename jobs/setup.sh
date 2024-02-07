@@ -2,7 +2,6 @@
 
 # Perform all the mfb settings in a raw up !
 mfb env
-exit 0
 
 # Install
 mfb select-bundle

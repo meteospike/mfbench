@@ -90,6 +90,7 @@ while [[ $# -gt 0 ]]; do
         echo " + mfb env                  : Display current mfbench environment"
         echo " + mfb omp                  : Display current OpenMP environment"
         echo " + mfb var [vars]           : Display specified env variables"
+        echo " + mfb get [vars]           : Get the actual value of the specified env variables"
         echo " + mfb set [var] [value]    : Set the env variable to specified value"
         echo " + mfb unset [vars]         : Unset the specified env variables"
         echo " + mfb path                 : Display actual internal path"
@@ -119,7 +120,8 @@ while [[ $# -gt 0 ]]; do
         echo "-- COMPILE------------------"
         echo " + mfb mkmain               : Create a complete base pack including hub and main"
         echo " + mfb mkpack               : Create an incremental pack on top of a previous one"
-        echo " + mfb icsupd               : Apply existing filters functions on ics files of created pack"
+        echo " + mfb rmpack [pack]        : Remove specified pack or current pack"
+        echo " + mfb fixpack              : Apply existing filters functions on ics/ild files"
         echo " + mfb pack                 : Display the full path of the current pack"
         echo " + mfb nest                 : Set the current directory as the current pack"
         echo " + mfb compile              : Compile through ics files in the current pack"
@@ -152,6 +154,8 @@ while [[ $# -gt 0 ]]; do
     cat $MFBENCH_ROOT/VERSION
 
   elif [ "$mfb" == "init" ]; then
+
+    [[ -f ../bin/mfbench.sh && -d ../jobs ]] && \cd ..
 
     if [[ ! -f "$PWD/bin/mfbench.sh" || ! -d "$PWD/jobs" ]]; then
       echo "You are probably not in a MFBENCH root directory" >&2
@@ -255,9 +259,9 @@ while [[ $# -gt 0 ]]; do
     echo "MFBENCH_ROOT=$MFBENCH_ROOT" > $HOME/.mfb_root
     echo "MFBENCH_PROFILE=$MFBENCH_PROFILE" > $HOME/.mfb_profile
 
-    set -- freeze $*
+    set -- setenv $*
 
-  elif [ "$mfb" == "freeze" ]; then
+  elif [ "$mfb" == "setenv" ]; then
 
     echo "Freezing current mfbench environment"
 
@@ -389,7 +393,7 @@ while [[ $# -gt 0 ]]; do
 
     echo $this_var=$this_value
     export $this_var=$this_value
-    set -- freeze
+    set -- setenv
 
   elif [ "$mfb" == "unset" ]; then
 
@@ -406,7 +410,7 @@ while [[ $# -gt 0 ]]; do
       fi
     done
 
-    [[ $updated -eq 1 ]] && set -- freeze
+    [[ $updated -eq 1 ]] && set -- setenv
 
   elif [ "$mfb" == "omp" ]; then
 
@@ -732,7 +736,7 @@ while [[ $# -gt 0 ]]; do
       export MFBENCH_MAINPACK=$this_pack
     fi
 
-    set -- freeze $*
+    set -- setenv
 
   elif [ "$mfb" == "mkmain" ]; then
 
@@ -773,9 +777,9 @@ while [[ $# -gt 0 ]]; do
     export MFBENCH_MAINPACK=$MFBENCH_PACK
 
     if [ "$MFBENCH_AUTOPACK" == "yes" ]; then
-      set -- freeze icsupd install $(bundle.py --type hub) $(bundle.py --type main)
+      set -- setenv fixpack install $(bundle.py --type hub) $(bundle.py --type main)
     else
-      set -- freeze icsupd
+      set -- setenv fixpack
     fi
 
   elif [ "$mfb" == "mkpack" ]; then
@@ -838,9 +842,9 @@ while [[ $# -gt 0 ]]; do
       -l $MFBENCH_ARCH -o $MFBENCH_OPTS -p $(cat $MFBENCH_CONF/gmkpack-binaries)
 
     export MFBENCH_LASTPACK=$MFBENCH_PACK
-    set -- freeze icsupd
+    set -- setenv fixpack
 
-  elif [ "$mfb" == "icsupd" ]; then
+  elif [ "$mfb" == "fixpack" ]; then
 
     mandatory_var_raw rootpack pack conf
 
@@ -853,6 +857,29 @@ while [[ $# -gt 0 ]]; do
       echo "Apply function $compile_func..."
       $compile_func
     done
+
+  elif [ "$mfb" == "rmpack" ]; then
+
+    mandatory_var_raw rootpack pack
+
+    if [ $# -gt 0 ]; then
+      this_pack=$1
+      shift
+    else
+      this_pack=$MFBENCH_PACK
+    fi
+
+    \cd $MFBENCH_ROOTPACK
+    echo "Removing $this_pack..."
+    [[ "$tempo_fake" == "true" ]] && continue
+    \rm -rf $this_pack
+
+    [[ "$this_pack" == "$MFBENCH_LASTPACK" ]] && unset MFBENCH_LASTPACK
+    [[ "$this_pack" == "$MFBENCH_MAINPACK" ]] && unset MFBENCH_MAINPACK
+
+    unset MFBENCH_PACK
+
+    set -- setenv
 
   elif [ "$mfb" == "compilers" ]; then
 
