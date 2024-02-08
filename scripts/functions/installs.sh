@@ -103,7 +103,6 @@ function mfbench_install_from_git ()
   else
     git_select="--branch $MFBENCH_INSTALL_VERSION"
   fi
-  echo git clone $git_select $MFBENCH_INSTALL_GIT $MFBENCH_INSTALL_TOPDIR
   git clone $git_select $MFBENCH_INSTALL_GIT $MFBENCH_INSTALL_NAME
 }
 
@@ -169,7 +168,6 @@ function mfbench_install_yaml ()
   if [ -d "$MFBENCH_INSTALL/tools/yaml" ]; then
     echo "Install yaml already done ?"
   else
-    echo git clone https://github.com/yaml/pyyaml.git $MFBENCH_INSTALL/tools/yaml
     git clone https://github.com/yaml/pyyaml.git $MFBENCH_INSTALL/tools/yaml
   fi
 }

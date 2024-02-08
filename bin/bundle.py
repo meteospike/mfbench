@@ -34,8 +34,13 @@ if os.environ['MFBENCH_CONF'] is None:
 if skip_yaml:
     bdle_dict = dict()
 else:
-    with io.open(os.path.join(os.environ['MFBENCH_CONF'], opts.file), 'r') as fbdl:
-        bdle_dict = yaml.safe_load(fbdl)
+    bdle_file = os.path.join(os.environ['MFBENCH_CONF'], opts.file)
+    if os.path.exists('bdle_file'):
+        with io.open(bdle_file, 'r') as fbdl:
+            bdle_dict = yaml.safe_load(fbdl)
+    else:
+        sys.stderr.write(f'Bundle file {bdle_file} not found\n')
+        exit(1)
 
 bdle_entries = sorted(bdle_dict.keys())
 if skip_yaml:

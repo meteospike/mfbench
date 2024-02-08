@@ -87,6 +87,7 @@ while [[ $# -gt 0 ]]; do
         echo " + mfb off                  : Turn off current session"
         echo " + mfb root                 : Display current mfbench root directory"
         echo " + mfb profile              : Display current profile name"
+        echo " + mfb pcunit               : Display current processing unit family (std/gpu)"
         echo " + mfb env                  : Display current mfbench environment"
         echo " + mfb omp                  : Display current OpenMP environment"
         echo " + mfb var [vars]           : Display specified env variables"
@@ -101,6 +102,7 @@ while [[ $# -gt 0 ]]; do
       if [ "$chapter" = "install" ]; then
         echo "-- INSTALL -----------------"
         echo " + mfb bundle               : List available bundles and set default"
+        echo " + mfb select-bundle        : Select a default bundle according to current mode"
         echo " + mfb flat-bundle          : List all items in the current bundle"
         echo " + mfb show-bundle          : Show items in the current bundle by type"
         echo " + mfb arch                 : Display actual arch value"
@@ -118,6 +120,8 @@ while [[ $# -gt 0 ]]; do
 
       if [ "$chapter" = "compile" ]; then
         echo "-- COMPILE------------------"
+        echo " + mfb gmkfile              : List available gmkfiles and set default"
+        echo " + mfb select-gmkfile       : Select a default gmkfile according to arch and opts"
         echo " + mfb mkmain               : Create a complete base pack including hub and main"
         echo " + mfb mkpack               : Create an incremental pack on top of a previous one"
         echo " + mfb rmpack [pack]        : Remove specified pack or current pack"
@@ -169,7 +173,7 @@ while [[ $# -gt 0 ]]; do
     export MFBENCH_ROOT=$PWD
     export MFBENCH_PROFILE=${1:-default}
     export MFBENCH_ARCH=$ARCH
-    export MFBENCH_MODE=std
+    export MFBENCH_PCUNIT=std
     export MFBENCH_AUTOPACK=yes
 
     export MFBENCH_STORE=$MFBENCH_ROOT/.mfb
@@ -331,6 +335,11 @@ while [[ $# -gt 0 ]]; do
 
     echo $MFBENCH_PROFILE
 
+
+  elif [ "$mfb" == "pcunit" ]; then
+
+    echo $MFBENCH_PCUNIT
+
   elif [ "$mfb" == "profdir" ]; then
 
       \cd $MFBENCH_PROFDIR
@@ -442,7 +451,8 @@ while [[ $# -gt 0 ]]; do
 
     \cd $MFBENCH_SUPPORT_ARCH
     \rm -f GMKFILE-SELECT.$(mfb profile)
-    \ln -s GMKFILE-$MFBENCH_ARCH.$MFBENCH_OPTS GMKFILE-SELECT.$MFBENCH_PROFILE
+    echo "Select gmkfile-$MFBENCH_ARCH.$MFBENCH_OPTS as default GMKFILE"
+    \ln -s gmkfile-$MFBENCH_ARCH.$MFBENCH_OPTS GMKFILE-SELECT.$MFBENCH_PROFILE
 
   elif [ "$mfb" == "sources" ]; then
 
@@ -585,7 +595,8 @@ while [[ $# -gt 0 ]]; do
 
     \cd $MFBENCH_CONF
     \rm -f BUNDLE-SELECT.$MFBENCH_PROFILE
-    \ln -s bundle-${MFBENCH_MODE}pack.yml BUNDLE-SELECT.$MFBENCH_PROFILE
+    echo "Select bundle-${MFBENCH_PCUNIT}pack.yml as default bundle"
+    \ln -s bundle-${MFBENCH_PCUNIT}pack.yml BUNDLE-SELECT.$MFBENCH_PROFILE
 
   elif [ "$mfb" == "process" ]; then
 
@@ -658,26 +669,26 @@ while [[ $# -gt 0 ]]; do
       todo_function="mfbench_${this_todo}_${this_under}"
       type_function="mfbench_${this_todo}_${MFBENCH_INSTALL_TYPE}"
       if [[ "$(declare -F $todo_function)" == "$todo_function" ]]; then
-        echo "> Processing specific $this_todo function $todo_function"
+        echo "Processing specific $this_todo function $todo_function"
         $todo_function
       elif [[ "$(declare -F $type_function)" == "$type_function" ]]; then
-        echo "> Processing type $this_todo function $type_function"
+        echo "Processing type $this_todo function $type_function"
         $type_function
       else
-        echo "> Processing generic $this_todo for $this_item"
+        echo "Processing generic $this_todo for $this_item"
         mfbench_${this_todo}_generic
       fi
 
       post_function="mfbench_post_${this_todo}_${this_under}"
       type_function="mfbench_post_${this_todo}_${MFBENCH_INSTALL_TYPE}"
       if [[ "$(declare -F $post_function)" == "$post_function" ]]; then
-        echo "> Processing specific post $this_todo $post_function"
+        echo "Processing specific post $this_todo function $post_function"
         $post_function
       elif [[ "$(declare -F $type_function)" == "$type_function" ]]; then
-        echo "> Processing type post $this_todo function $type_function"
+        echo "Processing type post $this_todo function $type_function"
         $type_function
       else
-        echo "> No post $this_todo to be done"
+        echo "No post $this_todo to be done"
       fi
 
       mfbench_${this_todo}_track_out $this_under
