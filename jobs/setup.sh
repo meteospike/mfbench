@@ -2,7 +2,7 @@
 
 # Perform all the mfb settings in a raw up !
 mfb init
-mfb set flavour std
+mfb set pcunit std
 mfb set arch OMGNU1140
 mfb set opts 2s
 mfb env

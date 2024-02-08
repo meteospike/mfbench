@@ -20,6 +20,14 @@ isnumber='^[0-9]+$'
 isbundle='^bundle\-'
 isyaml='\.ya?ml$'
 
+function check_private () {
+  if [ "$tempo_private" == "true" ]; then
+    tempo_private=false
+  else
+    echo "Subcommand '$mfb' is internal only" >&2
+    exit 1
+  fi
+}
 
 function mandatory_var_raw ()
 {
@@ -156,11 +164,11 @@ while [[ $# -gt 0 ]]; do
 
   elif [ "$mfb" == "version" ]; then
 
-    cat $MFBENCH_ROOT/VERSION
+    echo "This is mfbench $(cat $MFBENCH_ROOT/VERSION) at $MFBENCH_ROOT"
 
   elif [ "$mfb" == "linkable" ]; then
 
-    echo $(fgrep mfbench_mkdir_ln $0 | fgrep -v fgrep | sed 's/^\s*//' | cut -d " " -f2)
+    cut -d ":" -f 1 $(dirname $(realpath $0))/../conf/mfbench-optlink
 
   elif [ "$mfb" == "init" ]; then
 
@@ -183,10 +191,10 @@ while [[ $# -gt 0 ]]; do
       mkdir $MFBENCH_STORE
     fi
 
-    if [ -f "$MFBENCH_STORE/env.preferences" ]; then
-      echo "Load preferences for env values:"
-      cat $MFBENCH_STORE/env.preferences
-      set -a; source $MFBENCH_STORE/env.preferences; set +a
+    if [ -f "$HOME/.mfbrc" ]; then
+      echo "Load user preferences:"
+      cat $HOME/.mfbrc
+      set -a; source $HOME/.mfbrc; set +a
     fi
 
     for varname in $(env | fgrep MFBENCH_ | cut -d "=" -f1); do
@@ -201,7 +209,7 @@ while [[ $# -gt 0 ]]; do
     export MFBENCH_SCRIPTS_FUNCTIONS=$MFBENCH_SCRIPTS/functions
     export MFBENCH_SCRIPTS_WRAPPERS=$MFBENCH_SCRIPTS/wrappers
 
-    source $MFBENCH_SCRIPTS/functions/directories.sh
+    source $MFBENCH_SCRIPTS_FUNCTIONS/directories.sh
 
     export MFBENCH_PROFDIR=$MFBENCH_STORE/profile_$MFBENCH_PROFILE
     mfbench_mkdir profdir
@@ -223,8 +231,8 @@ while [[ $# -gt 0 ]]; do
     export MFBENCH_INSTALL=${MFBENCH_INSTALL:-$MFBENCH_ROOT/install}
     mfbench_mkdir_ln install $MFBENCH_ROOT
 
-    export MFBENCH_ROOTPACK=${MFBENCH_ROOTPACK:-$MFBENCH_ROOT/pack}
-    mfbench_mkdir_ln rootpack $MFBENCH_ROOT
+    export MFBENCH_PACKS=${MFBENCH_PACKS:-$MFBENCH_ROOT/packs}
+    mfbench_mkdir_ln packs $MFBENCH_ROOT
 
     export MFBENCH_SOURCES=${MFBENCH_SOURCES:-$MFBENCH_ROOT/sources}
     mfbench_mkdir_ln sources $MFBENCH_ROOT
@@ -272,6 +280,24 @@ while [[ $# -gt 0 ]]; do
     echo "MFBENCH_PROFILE=$MFBENCH_PROFILE" > $HOME/.mfb_profile
 
     set -- setenv $*
+
+  elif [ "$mfb" == "link" ]; then
+
+    if [ $# -ne 2 ]; then
+      echo "Usage: mfb link mfbench-dir source-dir"
+      exit 1
+    fi
+
+    [[ "$MFBENCH_FUNCTIONS_DIRECTORIES" != "true" ]] && source $MFBENCH_SCRIPTS_FUNCTIONS/directories.sh
+
+    export tempo_envupd=0
+    mfbench_renew_ln $1 $2
+
+    if [ $tempo_envupd -eq 1 ]; then
+      set -- setenv
+    else
+      set --
+    fi
 
   elif [ "$mfb" == "setenv" ]; then
 
@@ -338,7 +364,6 @@ while [[ $# -gt 0 ]]; do
   elif [ "$mfb" == "profile" ]; then
 
     echo $MFBENCH_PROFILE
-
 
   elif [ "$mfb" == "pcunit" ]; then
 
@@ -414,7 +439,7 @@ while [[ $# -gt 0 ]]; do
 
   elif [ "$mfb" == "unset" ]; then
 
-    updated=0
+    tempo_envupd=0
     while [[ $# -gt 0 ]]; do
       this_var="MFBENCH_${1^^}"
       shift
@@ -423,11 +448,11 @@ while [[ $# -gt 0 ]]; do
       else
         echo "Unset ${this_var}"
         unset ${this_var}
-        updated=1
+        tempo_envupd=1
       fi
     done
 
-    [[ $updated -eq 1 ]] && set -- setenv
+    [[ $tempo_envupd -eq 1 ]] && set -- setenv
 
   elif [ "$mfb" == "omp" ]; then
 
@@ -440,9 +465,7 @@ while [[ $# -gt 0 ]]; do
 
   elif [ "$mfb" == "gmkfile" ]; then
 
-    if [ "$MFBENCH_FUNCTIONS_DIRECTORIES" != "true" ]; then
-      source $MFBENCH_SCRIPTS/functions/directories.sh
-    fi
+    [[ "$MFBENCH_FUNCTIONS_DIRECTORIES" != "true" ]] && source $MFBENCH_SCRIPTS_FUNCTIONS/directories.sh
 
     if [[ $# -gt 0 && $1 =~ $isnumber ]]; then
       inum=$1
@@ -488,27 +511,25 @@ while [[ $# -gt 0 ]]; do
 
   elif [ "$mfb" == "list" ]; then
 
-      if [ "$MFBENCH_FUNCTIONS_DIRECTORIES" != "true" ]; then
-        source $MFBENCH_SCRIPTS/functions/directories.sh
-      fi
+    [[ "$MFBENCH_FUNCTIONS_DIRECTORIES" != "true" ]] && source $MFBENCH_SCRIPTS_FUNCTIONS/directories.sh
 
-      if [ $# -eq 0 ]; then
-        set -- all
-      fi
+    if [ $# -eq 0 ]; then
+      set -- all
+    fi
 
-      while [[ $# -gt 0 ]]; do
-        if [ "$1" == "all" ]; then
-          shift
-          set -- pack jobs conf inputs outputs refs sources install scripts/functions scripts/wrappers workdir $*
-          continue
-        fi
-        mfbench_listdir $1
-        if [[ $? == 0 ]]; then
-          shift
-        else
-          break
-        fi
-      done
+    while [[ $# -gt 0 ]]; do
+      if [ "$1" == "all" ]; then
+        shift
+        set -- pack jobs conf inputs outputs refs sources install scripts/functions scripts/wrappers workdir $*
+        continue
+      fi
+      mfbench_listdir $1
+      if [[ $? == 0 ]]; then
+        shift
+      else
+        break
+      fi
+    done
 
   elif [ "$mfb" == "data" ]; then
 
@@ -578,9 +599,7 @@ while [[ $# -gt 0 ]]; do
 
   elif [ "$mfb" == "bundle" ]; then
 
-    if [ "$MFBENCH_FUNCTIONS_DIRECTORIES" != "true" ]; then
-      source $MFBENCH_SCRIPTS/functions/directories.sh
-    fi
+    [[ "$MFBENCH_FUNCTIONS_DIRECTORIES" != "true" ]] && source $MFBENCH_SCRIPTS_FUNCTIONS/directories.sh
 
     if [[ $# -gt 0 && $1 =~ $isnumber ]]; then
       inum=$1
@@ -650,7 +669,7 @@ while [[ $# -gt 0 ]]; do
       [[ "$tempo_fake" == "true" ]] && continue
 
       if [ "$MFBENCH_FUNCTIONS_INSTALLS" != "true" ]; then
-        source $MFBENCH_SCRIPTS/functions/installs.sh
+        source $MFBENCH_SCRIPTS_FUNCTIONS/installs.sh
       fi
 
       if [ ! -d $MFBENCH_INSTALL_TARGET ]; then
@@ -728,26 +747,26 @@ while [[ $# -gt 0 ]]; do
 
   elif [ "$mfb" == "pack" ]; then
 
-    mandatory_var_msg "'$mfb'" rootpack
+    mandatory_var_msg "'$mfb'" packs
 
     if [ "$MFBENCH_PACK" == "" ]; then
       mandatory_var_raw arch opts
       this_cycle=${MFBENCH_CYCLE:-$(cat $MFBENCH_CONF/gmkpack-cycle)}
       this_branch=${MFBENCH_BRANCH:-rapsmain}
       this_packid=${MFBENCH_PACKID:-01}
-      echo "$MFBENCH_ROOTPACK/${this_cycle}_${this_branch}.$this_packid.$MFBENCH_ARCH.$MFBENCH_OPTS"
+      echo "$MFBENCH_PACKS/${this_cycle}_${this_branch}.$this_packid.$MFBENCH_ARCH.$MFBENCH_OPTS"
     else
-      echo "$MFBENCH_ROOTPACK/$MFBENCH_PACK"
+      echo "$MFBENCH_PACKS/$MFBENCH_PACK"
     fi
 
   elif [ "$mfb" == "nest" ]; then
 
-    mandatory_var_msg "'$mfb'" rootpack
+    mandatory_var_msg "'$mfb'" packs
 
     this_root=$(dirname $PWD)
     this_pack=$(basename $PWD)
 
-    if [ "$this_root" != "$MFBENCH_ROOTPACK" ]; then
+    if [ "$this_root" != "$MFBENCH_PACKS" ]; then
       echo "This is not a proper location for a pack" >&2
       exit 1
     fi
@@ -765,7 +784,7 @@ while [[ $# -gt 0 ]]; do
 
   elif [ "$mfb" == "mkmain" ]; then
 
-    mandatory_var_msg "'$mfb'" rootpack arch opts
+    mandatory_var_msg "'$mfb'" packs arch opts
 
     this_cycle=${MFBENCH_CYCLE:-$(cat $MFBENCH_CONF/gmkpack-cycle)}
     this_branch=${MFBENCH_BRANCH:-rapsmain}
@@ -784,7 +803,7 @@ while [[ $# -gt 0 ]]; do
 
     export MFBENCH_PACK=${this_cycle}_${this_branch}.$this_packid.$MFBENCH_ARCH.$MFBENCH_OPTS
 
-    \cd $MFBENCH_ROOTPACK
+    \cd $MFBENCH_PACKS
     if [ -d $MFBENCH_PACK ]; then
       echo "Pack $MFBENCH_PACK already created"
       continue
@@ -809,7 +828,7 @@ while [[ $# -gt 0 ]]; do
 
   elif [ "$mfb" == "mkpack" ]; then
 
-    mandatory_var_msg "'$mfb'" arch opts rootpack mainpack
+    mandatory_var_msg "'$mfb'" arch opts packs mainpack
 
     main_cycle=$(echo $MFBENCH_MAINPACK | cut -d "." -f1 | cut -d "_" -f1)
     main_branch=$(echo $MFBENCH_MAINPACK | cut -d "." -f1 | cut -d "_" -f2)
@@ -848,7 +867,7 @@ while [[ $# -gt 0 ]]; do
 
     export MFBENCH_PACK=${main_cycle}_${this_branch}.$this_packid.$MFBENCH_ARCH.$MFBENCH_OPTS
 
-    \cd $MFBENCH_ROOTPACK
+    \cd $MFBENCH_PACKS
 
     if [ -d $MFBENCH_PACK ]; then
       echo "Pack $MFBENCH_PACK already created"
@@ -871,13 +890,13 @@ while [[ $# -gt 0 ]]; do
 
   elif [ "$mfb" == "fixpack" ]; then
 
-    mandatory_var_raw rootpack pack conf
+    mandatory_var_raw packs pack conf
 
     if [ "$MFBENCH_FUNCTIONS_COMPILE" != "true" ]; then
-      source $MFBENCH_SCRIPTS/functions/compile.sh
+      source $MFBENCH_SCRIPTS_FUNCTIONS/compile.sh
     fi
 
-    \cd $MFBENCH_ROOTPACK/$MFBENCH_PACK
+    \cd $MFBENCH_PACKS/$MFBENCH_PACK
     for compile_func in $(declare -F | fgrep mfbench_compile_ | cut -d " " -f3 | sort -u); do
       echo "Apply function $compile_func..."
       $compile_func
@@ -885,7 +904,7 @@ while [[ $# -gt 0 ]]; do
 
   elif [ "$mfb" == "rmpack" ]; then
 
-    mandatory_var_raw rootpack pack
+    mandatory_var_raw packs pack
 
     if [ $# -gt 0 ]; then
       this_pack=$1
@@ -894,7 +913,7 @@ while [[ $# -gt 0 ]]; do
       this_pack=$MFBENCH_PACK
     fi
 
-    \cd $MFBENCH_ROOTPACK
+    \cd $MFBENCH_PACKS
     echo "Removing $this_pack..."
     [[ "$tempo_fake" == "true" ]] && continue
     \rm -rf $this_pack
@@ -912,18 +931,22 @@ while [[ $# -gt 0 ]]; do
 
   elif [ "$mfb" == "build" ]; then
 
+    check_private
+    mandatory_var_raw packs
+    \cd $MFBENCH_PACKS
+
     if [ "$MFBENCH_PACK" == "" ]; then
       mandatory_var_raw arch opts
       export MFBENCH_PACK=$(\ls -tr1d *.*.$MFBENCH_ARCH.$MFBENCH_OPTS | tail -1)
     fi
 
     if [ "$MFBENCH_FUNCTIONS_COMPILE" != "true" ]; then
-      source $MFBENCH_SCRIPTS/functions/compile.sh
+      source $MFBENCH_SCRIPTS_FUNCTIONS/compile.sh
     fi
 
     source $MFBENCH_SCRIPTS_WRAPPERS/setup_compilers.sh
 
-    \cd $MFBENCH_ROOTPACK/$MFBENCH_PACK
+    \cd $MFBENCH_PACKS/$MFBENCH_PACK
     pwd
 
     build_prefix=$1
@@ -946,16 +969,18 @@ while [[ $# -gt 0 ]]; do
 
   elif [ "$mfb" == "compile" ]; then
 
+    tempo_private=true
     set -- build ics $*
 
   elif [ "$mfb" == "load" ]; then
 
+    tempo_private=true
     set -- build ild $*
 
   elif [ "$mfb" == "clean" ]; then
 
-    mandatory_var_raw rootpack pack
-    \cd $MFBENCH_ROOTPACK/$MFBENCH_PACK
+    mandatory_var_raw packs pack
+    \cd $MFBENCH_PACKS/$MFBENCH_PACK
     cleanpack
     resetpack
 

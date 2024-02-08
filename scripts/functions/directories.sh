@@ -23,6 +23,34 @@ function mfbench_mkdir_ln ()
   fi
 }
 
+function mfbench_renew_ln ()
+{
+  local mfb_name=$1
+  local src_path=$2
+  if [ ! -d $src_path ]; then
+    echo "Source directory $src_path not found" >&2
+    exit 1
+  fi
+  local top_name=$(fgrep "$mfb_name:" $MFBENCH_CONF/mfbench-optlink | cut -d ":" -f2)
+  if [ "$top_name" == "" ]; then
+    echo "Directory '$mfb_name' is not linkable" >&2
+    exit 1
+  fi
+  local top_var="MFBENCH_${top_name^^}"
+  local top_path=${!top_var}
+  echo "Attach directory is $top_path"
+  if [ -L $top_path/$mfb_name ]; then
+    echo "Removing $top_path/$mfb_name"
+    \rm -f $top_path/$mfb_name
+  elif [ -d $top_path/$mfb_name ]; then
+    \rmdir $top_path/$mfb_name 2>/dev/null
+  fi
+  echo "Link $src_path -> $mfb_name"
+  \ln -s $src_path $top_path/$mfb_name
+  export MFBENCH_${mfb_name^^}=$src_path
+  tempo_envupd=1
+}
+
 function mfbench_listdir ()
 {
   local dirkind=$(echo "MFBENCH_${1^^}" | tr [/] [_])

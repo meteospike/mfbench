@@ -3,8 +3,7 @@
 build/
 data/
 install/
-pack/
-rootpack
+packs/
 sources/
 *-SELECT.*
 

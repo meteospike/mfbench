@@ -114,7 +114,7 @@ else:
                         print(f'MFBENCH_INSTALL_SOURCE={actual_source}')
                     if 'gmkpack' in this_bdle:
                         print('MFBENCH_INSTALL_GMKPACK=yes')
-                        print(f'MFBENCH_INSTALL_TARGET=$MFBENCH_ROOTPACK/$MFBENCH_PACK/{this_bdle["gmkpack"]}')
+                        print(f'MFBENCH_INSTALL_TARGET=$MFBENCH_PACKS/$MFBENCH_PACK/{this_bdle["gmkpack"]}')
                     else:
                         print('MFBENCH_INSTALL_GMKPACK=no')
                         if bdle_type.startswith('lib'):
