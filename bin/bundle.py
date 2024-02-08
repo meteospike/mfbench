@@ -19,9 +19,11 @@ parser = argparse.ArgumentParser(
 
 parser.add_argument('--file', default='BUNDLE-SELECT.'+os.environ.get('MFBENCH_PROFILE', 'default'))
 parser.add_argument('--item', default=None)
-parser.add_argument('--conf', action='store_true')
+parser.add_argument('--cmap', action='store_true')
 parser.add_argument('--list', action='store_true')
 parser.add_argument('--flat', action='store_true')
+parser.add_argument('--arch', action='store_true')
+parser.add_argument('--info', action='store_true')
 parser.add_argument('--type', default=None)
 parser.add_argument('--load', default=None)
 
@@ -35,7 +37,7 @@ if skip_yaml:
     bdle_dict = dict()
 else:
     bdle_file = os.path.join(os.environ['MFBENCH_CONF'], opts.file)
-    if os.path.exists('bdle_file'):
+    if os.path.isfile(bdle_file):
         with io.open(bdle_file, 'r') as fbdl:
             bdle_dict = yaml.safe_load(fbdl)
     else:
@@ -43,6 +45,8 @@ else:
         exit(1)
 
 bdle_entries = sorted(bdle_dict.keys())
+bdle_arch = dict()
+
 if skip_yaml:
     bdle_flat = [ 'yaml' ]
 else:
@@ -119,12 +123,26 @@ else:
                             print('MFBENCH_INSTALL_TARGET=$MFBENCH_INSTALL/$MFBENCH_ARCH/lib')
                         else:
                             print(f'MFBENCH_INSTALL_TARGET=$MFBENCH_INSTALL/{bdle_type}')
-            elif opts.conf:
+            elif opts.cmap:
                 if bdle_dict[bdle_type]:
                     bdle_items = ' '.join(sorted(bdle_dict[bdle_type].keys()))
                 else:
                     bdle_items = ''
-                print(f'{bdle_type}:{bdle_items}')
+                print(f'{bdle_type:16s}: {bdle_items}')
+            elif opts.arch or opts.info:
+                for k, v in bdle_dict[bdle_type].items():
+                    if bdle_type == 'tools':
+                        info_arch='no'
+                    else:
+                        info_arch='yes'
+                    if 'gmkpack' in v:
+                        info_pack='yes'
+                    else:
+                        info_pack='no'
+                    if opts.info:
+                        print(f'{k}:{info_arch}:{info_pack}')
+                    else:
+                        print(f'{k:16s} : arch={info_arch:3s}  pack={info_pack:3s}')
 
 if opts.flat:
     print(' '.join(sorted(bdle_flat)))

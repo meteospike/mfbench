@@ -96,15 +96,16 @@ while [[ $# -gt 0 ]]; do
         echo " + mfb unset [vars]         : Unset the specified env variables"
         echo " + mfb path                 : Display actual internal path"
         echo " + mfb list [all|items]     : List any mfbench directory"
-        echo " + mfb store                : List contents of the mfbench internal store directory"
       fi
 
       if [ "$chapter" = "install" ]; then
         echo "-- INSTALL -----------------"
         echo " + mfb bundle               : List available bundles and set default"
         echo " + mfb select-bundle        : Select a default bundle according to current mode"
-        echo " + mfb flat-bundle          : List all items in the current bundle"
-        echo " + mfb show-bundle          : Show items in the current bundle by type"
+        echo " + mfb bundle-map           : Show items in the current bundle by type"
+        echo " + mfb bundle-list          : List all types in the current bundle in a raw"
+        echo " + mfb bundle-flat          : List all items in the current bundle in a raw"
+        echo " + mfb bundle-arch          : List all items in the current bundle with arch and pack options"
         echo " + mfb arch                 : Display actual arch value"
         echo " + mfb opts                 : Display actual opts value"
         echo " + mfb sources [+-] [items] : Display or set bench components"
@@ -204,6 +205,9 @@ while [[ $# -gt 0 ]]; do
 
     export MFBENCH_PROFDIR=$MFBENCH_STORE/profile_$MFBENCH_PROFILE
     mfbench_mkdir profdir
+
+    export MFBENCH_TRACKDIR=$MFBENCH_STORE/install_tracking
+    mfbench_mkdir trackdir
 
     export TMPDIR=${TMPDIR:-$HOME/tmp}
     export MFBENCH_TMPDIR=${MFBENCH_TMPDIR:-$TMPDIR}
@@ -506,20 +510,6 @@ while [[ $# -gt 0 ]]; do
         fi
       done
 
-  elif [ "$mfb" == "store" ]; then
-
-      if [ "$MFBENCH_FUNCTIONS_DIRECTORIES" != "true" ]; then
-        source $MFBENCH_SCRIPTS/functions/directories.sh
-      fi
-
-    if [[ $# -gt 0 && $1 =~ $isnumber ]]; then
-      inum=$1
-      shift
-      cat $(ls -1 $MFBENCH_STORE/* | head -$inum | tail -1)
-    else
-      mfbench_listdir store
-    fi
-
   elif [ "$mfb" == "data" ]; then
 
     set -- list inputs outputs refs $*
@@ -570,13 +560,21 @@ while [[ $# -gt 0 ]]; do
 
     set -- cmake fypp perl yaml $*
 
-  elif [ "$mfb" == "flat-bundle" ]; then
+  elif [ "$mfb" == "bundle-list" ]; then
+
+    exec bundle.py --list
+
+  elif [ "$mfb" == "bundle-flat" ]; then
 
     exec bundle.py --flat
 
-  elif [ "$mfb" == "show-bundle" ]; then
+  elif [ "$mfb" == "bundle-arch" ]; then
 
-    exec bundle.py --conf
+    exec bundle.py --arch | sort -u
+
+  elif [ "$mfb" == "bundle-map" ]; then
+
+    exec bundle.py --cmap
 
   elif [ "$mfb" == "bundle" ]; then
 
@@ -639,8 +637,14 @@ while [[ $# -gt 0 ]]; do
       set -a; source $MFBENCH_STORE/$this_todo.current; set +a
       \rm -rf $MFBENCH_STORE/$this_todo.current
 
-      [[ "$MFBENCH_INSTALL_MKARCH"  == "yes" ]] && mandatory_var_msg "$this_todo '$this_item'" arch opts
       [[ "$MFBENCH_INSTALL_GMKPACK" == "yes" ]] && mandatory_var_msg "$this_todo '$this_item'" pack
+
+      if [ "$MFBENCH_INSTALL_MKARCH"  == "yes" ]; then
+        mandatory_var_msg "$this_todo '$this_item'" arch opts
+        export MFBENCH_INSTALL_TRACKEXT=$MFBENCH_ARCH
+      else
+        export MFBENCH_INSTALL_TRACKEXT="shared"
+      fi
 
 
       [[ "$tempo_fake" == "true" ]] && continue
@@ -705,15 +709,19 @@ while [[ $# -gt 0 ]]; do
 
   elif [ "$mfb" == "installed" ]; then
 
-    \cd $MFBENCH_PROFDIR
-    \ls -1 track.* 2>/dev/null | cut -f2 -d "."
+    \cd $MFBENCH_TRACKDIR
+    \ls -1 track.*.shared track.*.$MFBENCH_ARCH 2>/dev/null | sort -u | cut -f2 -d "."
 
   elif [ "$mfb" == "track" ]; then
 
-    for file in $*; do
-      this_item=${1//-/_}
-      shift
-      [[ -f "$MFBENCH_PROFDIR/track.$this_item" ]] && cat $MFBENCH_PROFDIR/track.$this_item
+    for this_file in $*; do
+      this_item=${this_file//-/_}
+      for this_arch in shared $MFBENCH_ARCH; do
+        if [ -f "$MFBENCH_TRACKDIR/track.$this_item.$this_arch" ]; then
+          cat $MFBENCH_TRACKDIR/track.$this_item.$this_arch
+          continue
+        fi
+      done
     done
 
     set --

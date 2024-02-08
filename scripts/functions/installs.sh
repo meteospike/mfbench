@@ -12,30 +12,30 @@ function mfbench_install_track_out ()
 {
   \cd $MFBENCH_INSTALL_TARGET
   find * -type f -print | sort > $MFBENCH_TMPDIR/mfbench.track.$1.list2
-  comm -3 $MFBENCH_TMPDIR/mfbench.track.$1.list1 $MFBENCH_TMPDIR/mfbench.track.$1.list2 | sed 's/\t//g' > $MFBENCH_PROFDIR/track.$1
+  comm -3 $MFBENCH_TMPDIR/mfbench.track.$1.list1 $MFBENCH_TMPDIR/mfbench.track.$1.list2 | sed 's/\t//g' > $MFBENCH_TRACKDIR/track.$1.$MFBENCH_INSTALL_TRACKEXT
   \rm -f $MFBENCH_TMPDIR/mfbench.track.$1.list1 $MFBENCH_TMPDIR/mfbench.track.$1.list2
 }
 
 function mfbench_uninstall_track_in ()
 {
-  if [ -f $MFBENCH_PROFDIR/track.$1 ]; then
-    echo "Install was recorded in $MFBENCH_PROFDIR/track.$1"
+  if [ -f "$MFBENCH_TRACKDIR/track.$1.$MFBENCH_INSTALL_TRACKEXT" ]; then
+    echo "Install was recorded in $MFBENCH_TRACKDIR/track.$1.$MFBENCH_INSTALL_TRACKEXT"
   fi
 }
 
 function mfbench_uninstall_track_out ()
 {
-  if [ -f $MFBENCH_PROFDIR/track.$1 ]; then
+  if [ -f "$MFBENCH_TRACKDIR/track.$1.$MFBENCH_INSTALL_TRACKEXT" ]; then
     \cd $MFBENCH_INSTALL_TARGET
     local this_file
-    for this_file in $(< $MFBENCH_PROFDIR/track.$1); do
+    for this_file in $(< $MFBENCH_TRACKDIR/track.$1.$MFBENCH_INSTALL_TRACKEXT); do
       if [ -f $this_file ]; then
         echo "Removing file $this_file"
         \rm -f $this_file
       fi
     done
-    echo "Removing track file $MFBENCH_PROFDIR/track.$1"
-    \rm -f $MFBENCH_PROFDIR/track.$1
+    echo "Removing track file $MFBENCH_TRACKDIR/track.$1.$MFBENCH_INSTALL_TRACKEXT"
+    \rm -f $MFBENCH_TRACKDIR/track.$1.$MFBENCH_INSTALL_TRACKEXT
   fi
 }
 
