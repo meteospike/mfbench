@@ -5,6 +5,7 @@ data/
 install/
 packs/
 sources/
+support/arch/gmkfile-*
 *-SELECT.*
 
 # Byte-compiled / optimized / DLL files

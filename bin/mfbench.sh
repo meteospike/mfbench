@@ -96,20 +96,22 @@ while [[ $# -gt 0 ]]; do
         echo " + mfb root                 : Display current mfbench root directory"
         echo " + mfb profile              : Display current profile name"
         echo " + mfb pcunit               : Display current processing unit family (std/gpu)"
+        echo " + mfb path                 : Display actual internal path"
         echo " + mfb env                  : Display current mfbench environment"
         echo " + mfb omp                  : Display current OpenMP environment"
         echo " + mfb var [vars]           : Display specified env variables"
         echo " + mfb get [vars]           : Get the actual value of the specified env variables"
         echo " + mfb set [var] [value]    : Set the env variable to specified value"
         echo " + mfb unset [vars]         : Unset the specified env variables"
-        echo " + mfb path                 : Display actual internal path"
+        echo " + mfb clone [new-name]     : Clone current profile to the one specified"
+        echo " + mfb switch [new-name]    : Switch from current profile to the one specified"
         echo " + mfb list [all|items]     : List any mfbench directory"
       fi
 
       if [ "$chapter" = "install" ]; then
         echo "-- INSTALL -----------------"
-        echo " + mfb bundle               : List available bundles and set default"
-        echo " + mfb select-bundle        : Select a default bundle according to current mode"
+        echo " + mfb bundle [num]         : List available bundles and set default"
+        echo " + mfb bundle-select        : Select a default bundle according to current mode"
         echo " + mfb bundle-map           : Show items in the current bundle by type"
         echo " + mfb bundle-list          : List all types in the current bundle in a raw"
         echo " + mfb bundle-flat          : List all items in the current bundle in a raw"
@@ -129,12 +131,12 @@ while [[ $# -gt 0 ]]; do
 
       if [ "$chapter" = "compile" ]; then
         echo "-- COMPILE------------------"
-        echo " + mfb gmkfile              : List available gmkfiles and set default"
-        echo " + mfb select-gmkfile       : Select a default gmkfile according to arch and opts"
+        echo " + mfb gmkfile [num]        : List available gmkfiles and set default"
+        echo " + mfb gmkfile-select       : Select a default gmkfile according to arch and opts"
         echo " + mfb mkmain               : Create a complete base pack including hub and main"
         echo " + mfb mkpack               : Create an incremental pack on top of a previous one"
         echo " + mfb rmpack [pack]        : Remove specified pack or current pack"
-        echo " + mfb fixpack              : Apply existing filters functions on ics/ild files"
+        echo " + mfb postpack             : Apply existing filters functions on ics/ild files"
         echo " + mfb pack                 : Display the full path of the current pack"
         echo " + mfb nest                 : Set the current directory as the current pack"
         echo " + mfb compile              : Compile through ics files in the current pack"
@@ -238,9 +240,8 @@ while [[ $# -gt 0 ]]; do
     mfbench_mkdir_ln sources $MFBENCH_ROOT
 
     export MFBENCH_SUPPORT=$MFBENCH_ROOT/support
-    export MFBENCH_SUPPORT_ARCH=$MFBENCH_SUPPORT/arch
-    export MFBENCH_SUPPORT_LINK=$MFBENCH_SUPPORT/link
     mfbench_mkdir support
+    [[ ! -L $MFBENCH_SUPPORT/arch ]] && \ln -s $MFBENCH_CONF $MFBENCH_SUPPORT/arch
 
     export MFBENCH_DATA=$MFBENCH_ROOT/data
     mfbench_mkdir data
@@ -301,7 +302,7 @@ while [[ $# -gt 0 ]]; do
 
   elif [ "$mfb" == "setenv" ]; then
 
-    echo "Freezing current mfbench environment"
+    echo "Freezing mfbench environment"
 
     unset $(env | fgrep MFBENCH_FUNCTIONS_ | cut -d "=" -f1)
 
@@ -358,12 +359,82 @@ while [[ $# -gt 0 ]]; do
 
   elif [ "$mfb" == "root" ]; then
 
-    echo $MFBENCH_ROOT
     \cd $MFBENCH_ROOT
+    pwd
 
   elif [ "$mfb" == "profile" ]; then
 
     echo $MFBENCH_PROFILE
+
+  elif [ "$mfb" == "clone" ]; then
+
+    if [ $# -ne 1 ]; then
+      echo "Usage: mfb $mfb new-profile-name" >&2
+      exit 1
+    fi
+
+    \rm -rf $MFBENCH_STORE/profile_$1
+    \cp -r $MFBENCH_PROFDIR $MFBENCH_STORE/profile_$1
+
+    \cd $MFBENCH_CONF
+    for link_select in $(\ls -1 *-SELECT.$MFBENCH_PROFILE 2>/dev/null); do
+      base_select=$(basename $link_select .$MFBENCH_PROFILE)
+      real_select=$(basename $(readlink -f $link_select))
+      echo "Duplicate $base_select"
+      \ln -s $real_select $base_select.$1
+    done
+
+    export MFBENCH_PROFILE=$1
+    export MFBENCH_PROFDIR=$MFBENCH_STORE/profile_$MFBENCH_PROFILE
+    echo "MFBENCH_PROFILE=$MFBENCH_PROFILE" > $HOME/.mfb_profile
+    echo "Active profile is '$MFBENCH_PROFILE'"
+    set -- setenv
+
+  elif [ "$mfb" == "switch" ]; then
+
+    if [ $# -ne 1 ]; then
+      echo "Usage: mfb $mfb new-profile-name" >&2
+      exit 1
+    fi
+
+    if [ ! -d $MFBENCH_STORE/profile_$1 ]; then
+      echo "The specified profile '$1' does not exist" >&2
+      exit 1
+    fi
+
+    export MFBENCH_PROFILE=$1
+    echo "MFBENCH_PROFILE=$MFBENCH_PROFILE" > $HOME/.mfb_profile
+    echo "Active profile is '$MFBENCH_PROFILE'"
+    set --
+
+  elif [ "$mfb" == "rmprof" ]; then
+
+    if [ $# -ne 1 ]; then
+      echo "Usage: mfb $mfb new-profile-name" >&2
+      exit 1
+    fi
+
+    this_prof=$1
+    shift
+
+    if [ "$this_prof" == "$MFBENCH_PROFILE" ]; then
+      echo "Could not remove currently active profile" >&2
+      exit 1
+    fi
+
+    if [ -d $MFBENCH_STORE/profile_$this_prof ]; then
+      echo "Removing $MFBENCH_STORE/profile_$this_prof"
+      \rm -rf $MFBENCH_STORE/profile_$this_prof
+    else
+      echo "Profile '$this_prof' does not exist" >&2
+      exit 1
+    fi
+
+    \cd $MFBENCH_CONF
+    for link_select in $(\ls -1 *-SELECT.$this_prof 2>/dev/null); do
+      echo "Removing $link_select"
+      \rm -f $link_select
+    done
 
   elif [ "$mfb" == "pcunit" ]; then
 
@@ -458,7 +529,6 @@ while [[ $# -gt 0 ]]; do
 
     env | fgrep -e OMP_ -e KMP_ | sort
 
-
   elif [ "$mfb" == "gmk" ]; then
 
     env | fgrep -e GMK -e HOMEPACK -e ROOTPACK -e HOMEBIN -e ROOTBIN | sort
@@ -472,12 +542,12 @@ while [[ $# -gt 0 ]]; do
       shift
     fi
 
-    mfbench_listdir_def support/arch/GMKFILE $inum
+    mfbench_listdir_def conf/gmkfile $inum
 
-  elif [ "$mfb" == "select-gmkfile" ]; then
+  elif [ "$mfb" == "gmkfile-select" ]; then
 
-    \cd $MFBENCH_SUPPORT_ARCH
-    \rm -f GMKFILE-SELECT.$(mfb profile)
+    \cd $MFBENCH_CONF
+    \rm -f GMKFILE-SELECT.$MFBENCH_PROFILE
     echo "Select gmkfile-$MFBENCH_ARCH.$MFBENCH_OPTS as default GMKFILE"
     \ln -s gmkfile-$MFBENCH_ARCH.$MFBENCH_OPTS GMKFILE-SELECT.$MFBENCH_PROFILE
 
@@ -608,7 +678,7 @@ while [[ $# -gt 0 ]]; do
 
     mfbench_listdir_def conf/bundle $inum
 
-  elif [ "$mfb" == "select-bundle" ]; then
+  elif [ "$mfb" == "bundle-select" ]; then
 
     \cd $MFBENCH_CONF
     \rm -f BUNDLE-SELECT.$MFBENCH_PROFILE
@@ -668,9 +738,7 @@ while [[ $# -gt 0 ]]; do
 
       [[ "$tempo_fake" == "true" ]] && continue
 
-      if [ "$MFBENCH_FUNCTIONS_INSTALLS" != "true" ]; then
-        source $MFBENCH_SCRIPTS_FUNCTIONS/installs.sh
-      fi
+      [[ "$MFBENCH_FUNCTIONS_INSTALLS" != "true" ]] && source $MFBENCH_SCRIPTS_FUNCTIONS/installs.sh
 
       if [ ! -d $MFBENCH_INSTALL_TARGET ]; then
         echo "Creating directory $MFBENCH_INSTALL_TARGET"
@@ -750,10 +818,17 @@ while [[ $# -gt 0 ]]; do
     mandatory_var_msg "'$mfb'" packs
 
     if [ "$MFBENCH_PACK" == "" ]; then
+      previous_pack=${MFBENCH_LASTPACK:-$MFBENCH_MAINPACK}
       mandatory_var_raw arch opts
-      this_cycle=${MFBENCH_CYCLE:-$(cat $MFBENCH_CONF/gmkpack-cycle)}
-      this_branch=${MFBENCH_BRANCH:-rapsmain}
-      this_packid=${MFBENCH_PACKID:-01}
+      if [ "$previous_pack" = "" ]; then
+        this_cycle=${MFBENCH_CYCLE:-$(cat $MFBENCH_CONF/gmkpack-cycle)}
+        this_branch=${MFBENCH_BRANCH:-rapsmain}
+        this_packid=${MFBENCH_PACKID:-01}
+      else
+        this_cycle=$(echo $previous_pack | cut -d "." -f1 | cut -d "_" -f1)
+        this_branch=$(echo $previous_pack | cut -d "." -f1 | cut -d "_" -f2)
+        this_packid=$(echo $previous_pack | cut -d "." -f2)
+      fi
       echo "$MFBENCH_PACKS/${this_cycle}_${this_branch}.$this_packid.$MFBENCH_ARCH.$MFBENCH_OPTS"
     else
       echo "$MFBENCH_PACKS/$MFBENCH_PACK"
@@ -772,7 +847,7 @@ while [[ $# -gt 0 ]]; do
     fi
 
     export MFBENCH_PACK=$this_pack
-    \ls src/inter.1 2>/dev/null
+    \ls src/main 2>/dev/null
     if [ $? -eq 0 ]; then
       export MFBENCH_LASTPACK=$this_pack
     else
@@ -809,6 +884,8 @@ while [[ $# -gt 0 ]]; do
       continue
     fi
 
+    \cp $(realpath $MFBENCH_CONF/GMKFILE-SELECT.$MFBENCH_PROFILE) $MFBENCH_SUPPORT/arch/
+
     echo "Creating base pack $MFBENCH_PACK"
     [[ "$tempo_fake" == "true" ]] && continue
 
@@ -818,12 +895,17 @@ while [[ $# -gt 0 ]]; do
       -n $this_packid \
       -l $MFBENCH_ARCH -o $MFBENCH_OPTS -a -K -p $(cat $MFBENCH_CONF/gmkpack-binaries)
 
+    if [ $? -ne 0 ]; then
+      echo "Could not complete '$mfb'" >&2
+      exit 1
+    fi
+
     export MFBENCH_MAINPACK=$MFBENCH_PACK
 
     if [ "$MFBENCH_AUTOPACK" == "yes" ]; then
-      set -- setenv fixpack install $(bundle.py --type hub) $(bundle.py --type main)
+      set -- setenv postpack install $(bundle.py --type hub) $(bundle.py --type main)
     else
-      set -- setenv fixpack
+      set -- setenv postpack
     fi
 
   elif [ "$mfb" == "mkpack" ]; then
@@ -886,15 +968,13 @@ while [[ $# -gt 0 ]]; do
       -l $MFBENCH_ARCH -o $MFBENCH_OPTS -p $(cat $MFBENCH_CONF/gmkpack-binaries)
 
     export MFBENCH_LASTPACK=$MFBENCH_PACK
-    set -- setenv fixpack
+    set -- setenv postpack
 
-  elif [ "$mfb" == "fixpack" ]; then
+  elif [ "$mfb" == "postpack" ]; then
 
     mandatory_var_raw packs pack conf
 
-    if [ "$MFBENCH_FUNCTIONS_COMPILE" != "true" ]; then
-      source $MFBENCH_SCRIPTS_FUNCTIONS/compile.sh
-    fi
+    [[ "$MFBENCH_FUNCTIONS_COMPILE" != "true" ]] && source $MFBENCH_SCRIPTS_FUNCTIONS/compile.sh
 
     \cd $MFBENCH_PACKS/$MFBENCH_PACK
     for compile_func in $(declare -F | fgrep mfbench_compile_ | cut -d " " -f3 | sort -u); do
@@ -904,18 +984,20 @@ while [[ $# -gt 0 ]]; do
 
   elif [ "$mfb" == "rmpack" ]; then
 
-    mandatory_var_raw packs pack
+    mandatory_var_raw packs
 
     if [ $# -gt 0 ]; then
       this_pack=$1
       shift
     else
+      mandatory_var_raw pack
       this_pack=$MFBENCH_PACK
     fi
 
-    \cd $MFBENCH_PACKS
     echo "Removing $this_pack..."
     [[ "$tempo_fake" == "true" ]] && continue
+
+    \cd $MFBENCH_PACKS
     \rm -rf $this_pack
 
     [[ "$this_pack" == "$MFBENCH_LASTPACK" ]] && unset MFBENCH_LASTPACK
@@ -940,9 +1022,7 @@ while [[ $# -gt 0 ]]; do
       export MFBENCH_PACK=$(\ls -tr1d *.*.$MFBENCH_ARCH.$MFBENCH_OPTS | tail -1)
     fi
 
-    if [ "$MFBENCH_FUNCTIONS_COMPILE" != "true" ]; then
-      source $MFBENCH_SCRIPTS_FUNCTIONS/compile.sh
-    fi
+    [[ "$MFBENCH_FUNCTIONS_COMPILE" != "true" ]] && source $MFBENCH_SCRIPTS_FUNCTIONS/compile.sh
 
     source $MFBENCH_SCRIPTS_WRAPPERS/setup_compilers.sh
 
