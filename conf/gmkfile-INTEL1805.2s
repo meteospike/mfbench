@@ -341,10 +341,10 @@ LD_USR_FIELD_API = field_api_sp
 # ----------------------------------------------------
 
 # Lapack:
-LD_LANG01 = $MFBENCH_INSTALL/$MFBENCH_ARCH/lib/liblapack.so
+LD_LANG01 =
 
 # Blas:
-LD_LANG02 = $MFBENCH_INSTALL/$MFBENCH_ARCH/lib/libblas.so
+LD_LANG02 =
 
 # System-dependent libraries - ALWAYS LOADED - (absolute filename or short name) :
 # ------------------------------------------------------------------------------
