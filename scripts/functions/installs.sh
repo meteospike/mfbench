@@ -129,7 +129,7 @@ function mfbench_install_generic
 # ------------------------------------------------------------------------------
 # TYPE INSTALL FUNCTIONS
 
-function mfbench_install_dummy
+function mfbench_install_dummies
 {
   \cd $MFBENCH_BUILD
   bundle.py --load $MFBENCH_INSTALL_NAME | tee bundle_load.$MFBENCH_INSTALL_NAME.log
@@ -143,7 +143,7 @@ function mfbench_install_dummy
   fi
 }
 
-function mfbench_uninstall_dummy
+function mfbench_uninstall_dummies
 {
   \cd $MFBENCH_BUILD
   if [ -f bundle_load.$MFBENCH_INSTALL_NAME.log ]; then
