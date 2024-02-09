@@ -2,13 +2,13 @@
 
 export MFBENCH_FUNCTIONS_INSTALLS=true
 
-function mfbench_install_track_in ()
+function mfbench_install_track_in
 {
   \cd $MFBENCH_INSTALL_TARGET
   find * -type f -print | sort > $MFBENCH_TMPDIR/mfbench.track.$1.list1
 }
 
-function mfbench_install_track_out ()
+function mfbench_install_track_out
 {
   \cd $MFBENCH_INSTALL_TARGET
   find * -type f -print | sort > $MFBENCH_TMPDIR/mfbench.track.$1.list2
@@ -16,14 +16,14 @@ function mfbench_install_track_out ()
   \rm -f $MFBENCH_TMPDIR/mfbench.track.$1.list1 $MFBENCH_TMPDIR/mfbench.track.$1.list2
 }
 
-function mfbench_uninstall_track_in ()
+function mfbench_uninstall_track_in
 {
   if [ -f "$MFBENCH_TRACKDIR/track.$1.$MFBENCH_INSTALL_TRACKEXT" ]; then
     echo "Install was recorded in $MFBENCH_TRACKDIR/track.$1.$MFBENCH_INSTALL_TRACKEXT"
   fi
 }
 
-function mfbench_uninstall_track_out ()
+function mfbench_uninstall_track_out
 {
   if [ -f "$MFBENCH_TRACKDIR/track.$1.$MFBENCH_INSTALL_TRACKEXT" ]; then
     \cd $MFBENCH_INSTALL_TARGET
@@ -39,7 +39,7 @@ function mfbench_uninstall_track_out ()
   fi
 }
 
-function mfbench_set_env ()
+function mfbench_set_env
 {
   local this_name=$1
   shift
@@ -51,7 +51,7 @@ function mfbench_set_env ()
   done
 }
 
-function mfbench_set_path ()
+function mfbench_set_path
 {
   local this_name=$1
   local this_path=$2
@@ -63,7 +63,7 @@ function mfbench_set_path ()
   fi
 }
 
-function mfbench_set_python ()
+function mfbench_set_python
 {
   local this_name=$1
   local this_path=$2
@@ -78,7 +78,7 @@ function mfbench_set_python ()
 # ------------------------------------------------------------------------------
 # INSTALL
 
-function mfbench_install_from_archive ()
+function mfbench_install_from_archive
 {
   \cd $MFBENCH_BUILD
   if [ -d $MFBENCH_INSTALL_TOPDIR ]; then
@@ -94,7 +94,7 @@ function mfbench_install_from_archive ()
   fi
 }
 
-function mfbench_install_from_git ()
+function mfbench_install_from_git
 {
   \cd $MFBENCH_INSTALL_TARGET
   local git_select
@@ -106,7 +106,7 @@ function mfbench_install_from_git ()
   git clone $git_select $MFBENCH_INSTALL_GIT $MFBENCH_INSTALL_NAME
 }
 
-function mfbench_install_generic ()
+function mfbench_install_generic
 {
   if [[ "$MFBENCH_INSTALL_TYPE" != "tools" && "$MFBENCH_ARCH" == "" ]]; then
     echo "Variable MFBENCH_ARCH is mandatory for type [$MFBENCH_INSTALL_TYPE]" >&2
@@ -129,7 +129,7 @@ function mfbench_install_generic ()
 # ------------------------------------------------------------------------------
 # TYPE INSTALL FUNCTIONS
 
-function mfbench_install_dummy ()
+function mfbench_install_dummy
 {
   \cd $MFBENCH_BUILD
   bundle.py --load $MFBENCH_INSTALL_NAME | tee bundle_load.$MFBENCH_INSTALL_NAME.log
@@ -143,7 +143,7 @@ function mfbench_install_dummy ()
   fi
 }
 
-function mfbench_uninstall_dummy ()
+function mfbench_uninstall_dummy
 {
   \cd $MFBENCH_BUILD
   if [ -f bundle_load.$MFBENCH_INSTALL_NAME.log ]; then
@@ -163,7 +163,7 @@ function mfbench_uninstall_dummy ()
 # ------------------------------------------------------------------------------
 # SPECIFIC INSTALL OR POST INSTALL FUNCTIONS
 
-function mfbench_install_yaml ()
+function mfbench_install_yaml
 {
   if [ -d "$MFBENCH_INSTALL/tools/yaml" ]; then
     echo "Install yaml already done ?"
@@ -172,22 +172,22 @@ function mfbench_install_yaml ()
   fi
 }
 
-function mfbench_post_install_fypp ()
+function mfbench_post_install_fypp
 {
   mfbench_set_path fypp $MFBENCH_INSTALL_TARGET/$MFBENCH_INSTALL_NAME/bin
 }
 
-function mfbench_post_install_vimpack ()
+function mfbench_post_install_vimpack
 {
   mfbench_set_path vimpack $MFBENCH_INSTALL_TARGET/$MFBENCH_INSTALL_NAME
 }
 
-function mfbench_post_install_yaml ()
+function mfbench_post_install_yaml
 {
   mfbench_set_python yaml $MFBENCH_INSTALL/tools/yaml/lib
 }
 
-function mfbench_post_install_cmake ()
+function mfbench_post_install_cmake
 {
   if [ -d $MFBENCH_BUILD/$MFBENCH_INSTALL_TOPDIR ]; then
     \cd $MFBENCH_BUILD/$MFBENCH_INSTALL_TOPDIR
@@ -197,7 +197,7 @@ function mfbench_post_install_cmake ()
   fi
 }
 
-function mfbench_post_install_perl ()
+function mfbench_post_install_perl
 {
   if [ -d $MFBENCH_BUILD/$MFBENCH_INSTALL_TOPDIR ]; then
     \cd $MFBENCH_BUILD/$MFBENCH_INSTALL_TOPDIR
@@ -209,7 +209,7 @@ function mfbench_post_install_perl ()
   fi
 }
 
-function mfbench_post_install_generic_build ()
+function mfbench_post_install_generic_build
 {
   if [ -d $MFBENCH_BUILD/$MFBENCH_INSTALL_TOPDIR ]; then
     \cd $MFBENCH_BUILD
@@ -223,38 +223,38 @@ function mfbench_post_install_generic_build ()
   fi
 }
 
-function mfbench_post_install_eccodes ()
+function mfbench_post_install_eccodes
 {
   mfbench_post_install_generic_build -DENABLE_ECCODES_THREADS=1 -DENABLE_JPG=0 -DENABLE_AEC=OFF
 }
 
-function mfbench_post_install_hdf5 ()
+function mfbench_post_install_hdf5
 {
   mfbench_post_install_generic_build -DHDF5_ENABLE_Z_LIB_SUPPORT=ON -DHDF5_BUILD_FORTRAN=ON
 }
 
-function mfbench_post_install_netcdf_c ()
+function mfbench_post_install_netcdf_c
 {
   mfbench_post_install_generic_build
 }
 
-function mfbench_post_install_netcdf_fortran ()
+function mfbench_post_install_netcdf_fortran
 {
   export FFLAGS="-fallow-argument-mismatch"
   mfbench_post_install_generic_build
 }
 
-function mfbench_post_install_lapack ()
+function mfbench_post_install_lapack
 {
   mfbench_post_install_generic_build -DBUILD_SHARED_LIBS=ON
 }
 
-function mfbench_post_install_eigen ()
+function mfbench_post_install_eigen
 {
   mfbench_post_install_generic_build -DBUILD_SHARED_LIBS=ON
 }
 
-function mfbench_post_install_gmkpack ()
+function mfbench_post_install_gmkpack
 {
   if [ -d $MFBENCH_BUILD/$MFBENCH_INSTALL_TOPDIR ]; then
     \mv $MFBENCH_BUILD/$MFBENCH_INSTALL_TOPDIR $MFBENCH_INSTALL_TARGET
@@ -287,7 +287,7 @@ EOF
   fi
 }
 
-function mfbench_post_install_ial ()
+function mfbench_post_install_ial
 {
   [[ ! -d $MFBENCH_INSTALL_TARGET ]] && \mkdir -p $MFBENCH_INSTALL_TARGET
 
@@ -309,7 +309,7 @@ function mfbench_post_install_ial ()
 # ------------------------------------------------------------------------------
 # UNINSTALL
 
-function mfbench_uninstall_generic ()
+function mfbench_uninstall_generic
 {
   local this_dir
   for this_dir in $(\ls -1d $MFBENCH_BUILD/$MFBENCH_INSTALL_TOPDIR* 2>/dev/null); do

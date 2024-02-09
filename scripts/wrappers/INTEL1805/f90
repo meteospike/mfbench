@@ -2,4 +2,5 @@
 
 [[ "$MFBENCH_COMPILER_SETUP" != "" ]] && source $MFBENCH_COMPILER_SETUP
 
-exec mpicc $* -lm 
+export __INTEL_POST_FFLAGS="$*"
+exec ifort -mkl=sequential -lirc $LD_LIBRARY_WRAP

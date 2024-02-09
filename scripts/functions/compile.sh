@@ -2,7 +2,7 @@
 
 export MFBENCH_FUNCTIONS_COMPILE=true
 
-function mfbench_compile_1_threads ()
+function mfbench_compile_1_threads
 {
   local gmk_threads=${MFBENCH_THREADS:-$(cat $MFBENCH_CONF/gmkpack-threads)}
   local ics_file
@@ -14,7 +14,7 @@ function mfbench_compile_1_threads ()
   done
 }
 
-function mfbench_compile_2_huboff ()
+function mfbench_compile_2_huboff
 {
   local ics_file
   for ics_file in $(\ls -1 ics_* 2>/dev/null | fgrep -v ics_packages); do
@@ -26,7 +26,7 @@ function mfbench_compile_2_huboff ()
   done
 }
 
-function mfbench_compile_3_mkild ()
+function mfbench_compile_3_mkild
 {
   local ics_file
   for ics_file in $(\ls -1 ics_* 2>/dev/null | fgrep -v ics_packages); do

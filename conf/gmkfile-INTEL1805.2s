@@ -1,6 +1,6 @@
 
-# ARCHITECTURE FILE FOR LINUX PC (64 bits) WITH GNU (GFORTRAN) COMPILER
-# =====================================================================
+# ARCHITECTURE FILE FOR LINUX PLATFORMS WITH INTEL COMPILER AND INTEL MPI
+# =======================================================================
 
 # Fortran (cross-)compiler
 # ------------------------
@@ -12,7 +12,7 @@ FRTNAME = $MFBENCH_COMPILER_MPIF90
 
 VCCNAME = $MFBENCH_COMPILER_MPICC
 
-# C++ (cross-)com1Gpiler
+# C++ (cross-)compiler
 # --------------------
 
 CXXNAME = $MFBENCH_COMPILER_MPICXX
@@ -40,7 +40,7 @@ GMK_FYPP_FLAGS = -M $MFBENCH_INSTALL/tools/yaml/lib -m os -m yaml
 # Fortran compiler default version (stamp)
 # ----------------------------------------
 
-LIBFRT = echo OMGNU1140
+LIBFRT = echo INTEL1805
 
 # GPU Specifications
 # ------------------
@@ -50,9 +50,9 @@ GPU = none
 # Basic compilation flags
 # -----------------------
 
-FRTFLAGS = -c -fconvert=swap -fno-second-underscore -fbacktrace -m64 -fopenmp -ffree-line-length-none -fno-sign-zero -fpic -fcray-pointer -fno-range-check -g -pipe -fallow-argument-mismatch -fallow-invalid-boz -Wall
+FRTFLAGS = -c -convert big_endian -assume byterecl -align array64byte,all -traceback -fpic -qopenmp -qopenmp-threadprivate compat -fp-model source -ftz -diag-disable=remark,cpu-dispatch -qopt-report=5 -qopt-report-phase=vec
 
-VCCFLAGS = -c -m64 -fopenmp -fpic -g -pipe -Wall
+VCCFLAGS = -c -qopenmp -fpic -malign-double -ftz -fp-model precise -diag-disable=remark,cpu-dispatch -qopt-report=2 -qopt-report-phase=vec -diag-disable=10441
 
 # Option -C in order to create files without compiling inside odb98
 # In order to have any effect from the following -1 or -A options,
@@ -72,34 +72,34 @@ F90_NOCPPFLAG =
 
 # Fortran format flag
 # --------------------
-FREE_FRTFLAG = -ffree-form
-FIXED_FRTFLAG = -ffixed-form
+FREE_FRTFLAG = -free
+FIXED_FRTFLAG = -fixed
 
 # Optimized compilation flag
 # --------------------------
 
-OPT_FRTFLAGS = -O2
-OPT_VCCFLAGS = -O2
+OPT_FRTFLAGS = -g -O2 -march=core-avx2 -finline-functions -finline-limit=500 -Winline -qopt-prefetch=4 -fast-transcendentals -fimf-use-svml -no-fma
+OPT_VCCFLAGS = -g -O2 -march=core-avx2
 
 # Debugging compilation flag
 # --------------------------
 
-DBG_FRTFLAGS = -Og
+DBG_FRTFLAGS = -g -O0
 
 # Bound checking compilation flag
 # -------------------------------
 
-BCD_FRTFLAGS = -fbounds-check
+BCD_FRTFLAGS = -check bounds -mcmodel=medium
 
 # NaN pre-initialisation flag
 # ----------------------------
 
-NAN_FRTFLAGS = -finit-real=snan -ffpe-trap=invalid,zero,overflow
+NAN_FRTFLAGS = -init=arrays,snan -fp-stack-check -ftrapuv -fpe0 -fp-speculation=strict -check uninit -check pointers
 
 # Listing compilation flag
 # ------------------------
 
-LIST_FRTFLAGS =
+LIST_FRTFLAGS = -list -show nomap
 LIST_VCCFLAGS =
 
 # Filename extension for listing
@@ -171,7 +171,7 @@ LNK_EXEC =
 # flags for shared object targets
 # -------------------------------
 
-LNK_SOLIB = -shared
+LNK_SOLIB = -shared -o a.out
 
 # Fortran Flag for start/end group libraries 
 # ------------------------------------------
@@ -298,8 +298,8 @@ LD_USR_HDF5 = $MFBENCH_INSTALL/$MFBENCH_ARCH/lib/libhdf5.a
 LD_USR_MF_DUMMY =
 
 # "Magics :"
-LD_USR_MAGPLUS = MagPlus
-LD_USR_MAGICS = MagPlusSingle
+LD_USR_MAGPLUS =
+LD_USR_MAGICS =
 
 # "xml :"
 LD_USR_XML =
@@ -368,7 +368,7 @@ LD_MPI_DUMMY = dummy_mpi
 # ---------------------
 
 LD_LIBC  =
-LD_LIBM  = -lm
+LD_LIBM  =
 LD_LIBVFL =
 
 # External include pathes (path1:path2:...)
@@ -379,27 +379,27 @@ INCLUDEPATH = $MFBENCH_INSTALL/$MFBENCH_ARCH/include:$MFBENCH_INSTALL/$MFBENCH_A
 # (Cross-) nm command & options for BSD format
 # --------------------------------------------
 
-NMOPTS = /usr/bin/nm
+NMOPTS = nm 
 
 # Native awk program
 # ------------------
 
-AWK = /bin/awk
+AWK = awk 
 
 # (Cross-)archive
 # ---------------
 
-AR = /usr/bin/ar
+AR = ar 
 
 # Native archive
 # --------------
 
-ARNATIVE = /usr/bin/ar
+ARNATIVE = ar 
 
 # Native preprocessor
 # -------------------
 
-CPP = /usr/bin/cpp
+CPP = cpp 
 
 # cmake executable
 # ----------------

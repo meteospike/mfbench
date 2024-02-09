@@ -12,12 +12,12 @@ if [ "$MFBENCH_SCRIPTS_WRAPPERS" == "" ]; then
   exit 1
 fi
 
-for compiler in cc cxx f90 mpicc mpicxx mpif90; do
+for compiler in cc cxx f90 mpicc mpicxx mpif90 setup; do
   actual_var="MFBENCH_COMPILER_${compiler^^}"
   export $actual_var="$MFBENCH_SCRIPTS_WRAPPERS/$MFBENCH_ARCH/$compiler"
-  echo   $actual_var=${!actual_var}
+  echo export $actual_var=${!actual_var}
 done
 
 export MFBENCH_COMPILER_INSTALL="$MFBENCH_INSTALL/$MFBENCH_ARCH"
-echo   MFBENCH_COMPILER_INSTALL=$MFBENCH_COMPILER_INSTALL
+echo export MFBENCH_COMPILER_INSTALL=$MFBENCH_COMPILER_INSTALL
 

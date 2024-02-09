@@ -2,7 +2,7 @@
 
 export MFBENCH_FUNCTIONS_DIRECTORIES=true
 
-function mfbench_mkdir ()
+function mfbench_mkdir
 {
   local dirkind="MFBENCH_${1^^}"
   local dirfull=${!dirkind}
@@ -12,7 +12,7 @@ function mfbench_mkdir ()
   fi
 }
 
-function mfbench_mkdir_ln ()
+function mfbench_mkdir_ln
 {
   mfbench_mkdir $1
   if [ ! -e "$2/$1" ]; then
@@ -23,7 +23,7 @@ function mfbench_mkdir_ln ()
   fi
 }
 
-function mfbench_renew_ln ()
+function mfbench_renew_ln
 {
   local mfb_name=$1
   local src_path=$2
@@ -51,7 +51,7 @@ function mfbench_renew_ln ()
   tempo_envupd=1
 }
 
-function mfbench_listdir ()
+function mfbench_listdir
 {
   local dirkind=$(echo "MFBENCH_${1^^}" | tr [/] [_])
   local dirfull=${!dirkind}
@@ -68,7 +68,7 @@ function mfbench_listdir ()
   fi
 }
 
-function mfbench_listdir_def ()
+function mfbench_listdir_def
 {
   local partdir=$(dirname $1)
   local partsub=$(basename $1)

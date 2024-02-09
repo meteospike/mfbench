@@ -1,0 +1,6 @@
+#!/bin/bash
+
+[[ "$MFBENCH_COMPILER_SETUP" != "" ]] && source $MFBENCH_COMPILER_SETUP
+
+export __INTEL_POST_FFLAGS="$*"
+exec mpiifort -mkl=sequential -mt_mpi -lirc $LD_LIBRARY_WRAP

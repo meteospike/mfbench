@@ -1,3 +1,5 @@
 #!/bin/bash
 
+[[ "$MFBENCH_COMPILER_SETUP" != "" ]] && source $MFBENCH_COMPILER_SETUP
+
 exec mpic++ $* 

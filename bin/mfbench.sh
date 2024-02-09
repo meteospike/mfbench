@@ -20,7 +20,7 @@ isnumber='^[0-9]+$'
 isbundle='^bundle\-'
 isyaml='\.ya?ml$'
 
-function check_private () {
+function check_private {
   if [ "$tempo_private" == "true" ]; then
     tempo_private=false
   else
@@ -29,8 +29,7 @@ function check_private () {
   fi
 }
 
-function mandatory_var_raw ()
-{
+function mandatory_var_raw {
   for this_var in $*; do
     actual_var=MFBENCH_${this_var^^}
     if [ "${!actual_var}" == "" ]; then
@@ -40,8 +39,7 @@ function mandatory_var_raw ()
   done
 }
 
-function mandatory_var_msg ()
-{
+function mandatory_var_msg {
   this_msg=$1
   shift
   for this_var in $*; do
@@ -53,8 +51,7 @@ function mandatory_var_msg ()
   done
 }
 
-function mfbench_logfile ()
-{
+function mfbench_logfile {
   base_name=$1
   last_logfile=$(\ls -1 $base_name.[0-9][0-9].log 2>/dev/null | tail -1)
   if [ "$last_logfile" == "" ]; then
@@ -748,7 +745,7 @@ while [[ $# -gt 0 ]]; do
       fi
 
       if [ "$MFBENCH_INSTALL_MKARCH"  == "yes" ]; then
-        source $MFBENCH_SCRIPTS_WRAPPERS/setup_compilers.sh
+        source $MFBENCH_SCRIPTS_WRAPPERS/export_compilers.sh
         export CC=$MFBENCH_COMPILER_CC
         export FC=$MFBENCH_COMPILER_F90
         export CXX=$MFBENCH_COMPILER_CXX
@@ -1012,7 +1009,7 @@ while [[ $# -gt 0 ]]; do
 
   elif [ "$mfb" == "compilers" ]; then
 
-    source $MFBENCH_SCRIPTS_WRAPPERS/setup_compilers.sh
+    source $MFBENCH_SCRIPTS_WRAPPERS/export_compilers.sh
 
   elif [ "$mfb" == "build" ]; then
 
@@ -1027,7 +1024,7 @@ while [[ $# -gt 0 ]]; do
 
     [[ "$MFBENCH_FUNCTIONS_COMPILE" != "true" ]] && source $MFBENCH_SCRIPTS_FUNCTIONS/compile.sh
 
-    source $MFBENCH_SCRIPTS_WRAPPERS/setup_compilers.sh
+    source $MFBENCH_SCRIPTS_WRAPPERS/export_compilers.sh
 
     \cd $MFBENCH_PACKS/$MFBENCH_PACK
     pwd
