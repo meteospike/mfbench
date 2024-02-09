@@ -8,12 +8,13 @@ mfb set opts 2s
 mfb env
 
 # Install
-mfb select-bundle
+mfb bundle-auto
 mfb install yaml
-mfb tools libraries dummy
+mfb install tools
+mfb install libraries dummies
 
 # Create main gmk pack whith full hub and meteo librairies
-mfb select-gmkfile
+mfb gmkfile-auto
 mfb set autopack yes
 mfb mkmain
 

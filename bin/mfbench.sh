@@ -88,75 +88,77 @@ while [[ $# -gt 0 ]]; do
       shift
 
       if [ "$chapter" = "settings" ]; then
-        echo "-- SETTINGS ----------------"
-        echo " + mfb version              : Display current mfbench version"
-        echo " + mfb init                 : Set up default environment"
-        echo " + mfb on                   : Activate a session"
-        echo " + mfb off                  : Turn off current session"
-        echo " + mfb root                 : Display current mfbench root directory"
-        echo " + mfb profile              : Display current profile name"
-        echo " + mfb pcunit               : Display current processing unit family (std/gpu)"
-        echo " + mfb path                 : Display actual internal path"
-        echo " + mfb env                  : Display current mfbench environment"
-        echo " + mfb omp                  : Display current OpenMP environment"
-        echo " + mfb var [vars]           : Display specified env variables"
-        echo " + mfb get [vars]           : Get the actual value of the specified env variables"
-        echo " + mfb set [var] [value]    : Set the env variable to specified value"
-        echo " + mfb unset [vars]         : Unset the specified env variables"
-        echo " + mfb clone [new-name]     : Clone current profile to the one specified"
-        echo " + mfb switch [new-name]    : Switch from current profile to the one specified"
-        echo " + mfb list [all|items]     : List any mfbench directory"
+        echo "-- SETTINGS ------------------"
+        echo " + mfb version                : Display current mfbench version"
+        echo " + mfb init                   : Set up default environment"
+        echo " + mfb link [mfbdir] [srcdir] : Set up default environment"
+        echo " + mfb on                     : Activate a session"
+        echo " + mfb off                    : Turn off current session"
+        echo " + mfb root                   : Display current mfbench root directory"
+        echo " + mfb profile                : Display current profile name"
+        echo " + mfb pcunit                 : Display current processing unit family (std/gpu)"
+        echo " + mfb path                   : Display actual internal path"
+        echo " + mfb env                    : Display current mfbench environment"
+        echo " + mfb omp                    : Display current OpenMP environment"
+        echo " + mfb var [vars]             : Display specified env variables"
+        echo " + mfb get [vars]             : Get the actual value of the specified env variables"
+        echo " + mfb set [var] [value]      : Set the env variable to specified value"
+        echo " + mfb unset [vars]           : Unset the specified env variables"
+        echo " + mfb clone [new-name]       : Clone current profile to the one specified"
+        echo " + mfb switch [prof-name]     : Switch from current profile to the one specified"
+        echo " + mfb rmprof [prof-name]     : Delete the specified profile (sould not be active)"
+        echo " + mfb list [all|items]       : List any mfbench directory"
       fi
 
       if [ "$chapter" = "install" ]; then
-        echo "-- INSTALL -----------------"
-        echo " + mfb bundle [num]         : List available bundles and set default"
-        echo " + mfb bundle-select        : Select a default bundle according to current mode"
-        echo " + mfb bundle-map           : Show items in the current bundle by type"
-        echo " + mfb bundle-list          : List all types in the current bundle in a raw"
-        echo " + mfb bundle-flat          : List all items in the current bundle in a raw"
-        echo " + mfb bundle-arch          : List all items in the current bundle with arch and pack options"
-        echo " + mfb arch                 : Display actual arch value"
-        echo " + mfb opts                 : Display actual opts value"
-        echo " + mfb sources [+-] [items] : Display or set bench components"
-        echo " + mfb cmake                : Check CMake path and version"
-        echo " + mfb fypp                 : Check Fypp path and version"
-        echo " + mfb perl                 : Check Perl path and version"
-        echo " + mfb yaml                 : Check Yaml module and version"
-        echo " + mfb check                : Check all external tools versions"
-        echo " + mfb python               : Check Python path and version and seaarch path for modules"
-        echo " + mfb installed            : List local install items"
-        echo " + mfb track [items]        : List local install files for items"
+        echo "-- INSTALL -------------------"
+        echo " + mfb bundle [num]           : List available bundles and set default"
+        echo " + mfb bundle-auto            : Select a default bundle according to current mode"
+        echo " + mfb bundle-map             : Show items in the current bundle by type"
+        echo " + mfb bundle-list            : List all types in the current bundle in a raw"
+        echo " + mfb bundle-flat            : List all items in the current bundle in a raw"
+        echo " + mfb bundle-arch            : List all items in the current bundle with arch and pack options"
+        echo " + mfb arch                   : Display actual arch value"
+        echo " + mfb opts                   : Display actual opts value"
+        echo " + mfb sources [+-] [items]   : Display or set bench components"
+        echo " + mfb cmake                  : Check CMake path and version"
+        echo " + mfb fypp                   : Check Fypp path and version"
+        echo " + mfb perl                   : Check Perl path and version"
+        echo " + mfb yaml                   : Check Yaml module and version"
+        echo " + mfb check                  : Check all external tools versions"
+        echo " + mfb python                 : Check Python path and version and seaarch path for modules"
+        echo " + mfb installed              : List local install items"
+        echo " + mfb track [items]          : List local install files for items"
       fi
 
       if [ "$chapter" = "compile" ]; then
-        echo "-- COMPILE------------------"
-        echo " + mfb gmkfile [num]        : List available gmkfiles and set default"
-        echo " + mfb gmkfile-select       : Select a default gmkfile according to arch and opts"
-        echo " + mfb mkmain               : Create a complete base pack including hub and main"
-        echo " + mfb mkpack               : Create an incremental pack on top of a previous one"
-        echo " + mfb rmpack [pack]        : Remove specified pack or current pack"
-        echo " + mfb postpack             : Apply existing filters functions on ics/ild files"
-        echo " + mfb pack                 : Display the full path of the current pack"
-        echo " + mfb nest                 : Set the current directory as the current pack"
-        echo " + mfb compile              : Compile through ics files in the current pack"
-        echo " + mfb clean                : Clean and reset the current pack"
+        echo "-- COMPILE--------------------"
+        echo " + mfb gmkfile [num]          : List available gmkfiles and set default"
+        echo " + mfb gmkfile-auto           : Select a default gmkfile according to arch and opts"
+        echo " + mfb mkmain                 : Create a complete base pack including hub and main"
+        echo " + mfb mkpack                 : Create an incremental pack on top of a previous one"
+        echo " + mfb rmpack [pack]          : Remove specified pack or current pack"
+        echo " + mfb postpack               : Apply existing filters functions on ics/ild files"
+        echo " + mfb pack                   : Display the full path of the current pack"
+        echo " + mfb nest                   : Set the current directory as the current pack"
+        echo " + mfb compile                : Compile through ics files in the current pack"
+        echo " + mfb clean                  : Clean and reset the current pack"
       fi
 
       if [ "$chapter" = "inputs" ]; then
-        echo "-- INPUTS ------------------"
-        echo " + mfb inputs               : List available input configurations"
+        echo "-- INPUTS --------------------"
+        echo " + mfb inputs                 : List available input configurations"
       fi
 
       if [ "$chapter" = "execution" ]; then
-        echo "-- EXECUTION ---------------"
-        echo " + mfb play                 : Run the mfbench actual configuration"
-        echo " + mfb redo                 : Make and Play"
+        echo "-- EXECUTION -----------------"
+        echo " + mfb play                   : Run the mfbench actual configuration"
+        echo " + mfb redo                   : Make and Play"
       fi
 
       if [ "$chapter" = "outputs" ]; then
-        echo "-- OUTPUTS -----------------"
-        echo " + mfb outputs              : List actual outputs directories"
+        echo "-- OUTPUTS -------------------"
+        echo " + mfb outputs                : List actual outputs directories"
       fi
     done
 
@@ -544,11 +546,11 @@ while [[ $# -gt 0 ]]; do
 
     mfbench_listdir_def conf/gmkfile $inum
 
-  elif [ "$mfb" == "gmkfile-select" ]; then
+  elif [ "$mfb" == "gmkfile-auto" ]; then
 
     \cd $MFBENCH_CONF
     \rm -f GMKFILE-SELECT.$MFBENCH_PROFILE
-    echo "Select gmkfile-$MFBENCH_ARCH.$MFBENCH_OPTS as default GMKFILE"
+    echo "Select 'gmkfile-$MFBENCH_ARCH.$MFBENCH_OPTS' as default gmkfile"
     \ln -s gmkfile-$MFBENCH_ARCH.$MFBENCH_OPTS GMKFILE-SELECT.$MFBENCH_PROFILE
 
   elif [ "$mfb" == "sources" ]; then
@@ -678,11 +680,11 @@ while [[ $# -gt 0 ]]; do
 
     mfbench_listdir_def conf/bundle $inum
 
-  elif [ "$mfb" == "bundle-select" ]; then
+  elif [ "$mfb" == "bundle-auto" ]; then
 
     \cd $MFBENCH_CONF
     \rm -f BUNDLE-SELECT.$MFBENCH_PROFILE
-    echo "Select bundle-${MFBENCH_PCUNIT}pack.yml as default bundle"
+    echo "Select 'bundle-${MFBENCH_PCUNIT}pack.yml' as default bundle"
     \ln -s bundle-${MFBENCH_PCUNIT}pack.yml BUNDLE-SELECT.$MFBENCH_PROFILE
 
   elif [ "$mfb" == "process" ]; then
@@ -884,6 +886,7 @@ while [[ $# -gt 0 ]]; do
       continue
     fi
 
+    \rm -f $MFBENCH_SUPPORT/arch/*.$MFBENCH_ARCH.$MFBENCH_OPTS
     \cp $(realpath $MFBENCH_CONF/GMKFILE-SELECT.$MFBENCH_PROFILE) $MFBENCH_SUPPORT/arch/
 
     echo "Creating base pack $MFBENCH_PACK"
@@ -1075,6 +1078,9 @@ while [[ $# -gt 0 ]]; do
     while [[ $# -gt 0 ]]; do
       this_play=$1
       shift
+      echo "Playing '$this_play.sh'"
+      echo "Warning: this feature is not yet fully implemented"
+      # Should fix first a running environment and submit method
       exec ./$this_play.sh
     done
 

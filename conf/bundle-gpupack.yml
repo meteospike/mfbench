@@ -87,7 +87,7 @@ main:
         version : openacccpglagstack84
         gmkpack : 'src/local'
 
-dummy:
+dummies:
 
     gribex:
         name    : gribex
@@ -142,7 +142,7 @@ dummy:
 
     bufr:
         name    : bufr
-        skip    : rsmkp_ grsrnd_
+        dummy   : rsmkp_ grsrnd_
         abort   : >
                   abortx_ addFile addRead addWrite adjustGridAreaDefinition allocateMemory
                   bbuprs0_ bbuprs1_ bbuprs2_ bbuprs3_ bbuprt_ bbuprtbox_ bfkey_ bfprs2_

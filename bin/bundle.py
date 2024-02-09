@@ -63,15 +63,15 @@ elif opts.type:
     else:
         sys.stderr.write(f"Type '{opts.type}' not in that bundle\n")
 elif opts.load:
-    if opts.load in bdle_dict['dummy']:
-        this_src = 'lib' + bdle_dict['dummy'][opts.load].get('name', 'dummy_'+opts.load) + '.c'
+    if opts.load in bdle_dict['dummies']:
+        this_src = 'lib' + bdle_dict['dummies'][opts.load].get('name', 'dummy_'+opts.load) + '.c'
         print(this_src)
         with io.open(os.path.join(os.environ['MFBENCH_BUILD'], this_src), 'w') as fld:
             fld.write("#include <stdlib.h>\n\n")
-            for this_entry in bdle_dict['dummy'][opts.load].get('abort', '').split():
+            for this_entry in bdle_dict['dummies'][opts.load].get('abort', '').split():
                 print(f"Generate abort code for '{this_entry}'")
                 fld.write(f'void {this_entry} () {{ abort (); }}\n')
-            for this_entry in bdle_dict['dummy'][opts.load].get('skip', '').split():
+            for this_entry in bdle_dict['dummies'][opts.load].get('dummy', '').split():
                 print(f"Generate dummy code for '{this_entry}'")
                 fld.write(f'void {this_entry} () {{ }}\n')
     else:
@@ -104,7 +104,7 @@ else:
                         actual_topdir  = this_bdle.get('topdir', opts.item)
                         print(f'MFBENCH_INSTALL_TOPDIR={actual_topdir}')
                         print(f'MFBENCH_INSTALL_GIT={this_bdle["git"]}')
-                    elif bdle_type == 'dummy':
+                    elif bdle_type == 'dummies':
                         pass
                     else:
                         actual_topdir  = this_bdle.get('topdir', opts.item + '-' + this_bdle['version'])
@@ -119,7 +119,7 @@ else:
                         print('MFBENCH_INSTALL_GMKPACK=no')
                         if bdle_type.startswith('lib'):
                             print('MFBENCH_INSTALL_TARGET=$MFBENCH_INSTALL/$MFBENCH_ARCH')
-                        elif bdle_type == 'dummy':
+                        elif bdle_type == 'dummies':
                             print('MFBENCH_INSTALL_TARGET=$MFBENCH_INSTALL/$MFBENCH_ARCH/lib')
                         else:
                             print(f'MFBENCH_INSTALL_TARGET=$MFBENCH_INSTALL/{bdle_type}')

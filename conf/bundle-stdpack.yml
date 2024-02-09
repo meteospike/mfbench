@@ -89,7 +89,7 @@ main:
         source  : ial-49t0_rapslite.10
         gmkpack : 'src/local'
 
-dummy:
+dummies:
 
     gribex:
         name    : gribex
@@ -144,7 +144,7 @@ dummy:
 
     bufr:
         name    : bufr
-        skip    : grsmkp_ grsrnd_
+        dummy   : grsmkp_ grsrnd_
         abort   : >
                   abortx_ addFile addRead addWrite adjustGridAreaDefinition allocateMemory
                   bbuprs0_ bbuprs1_ bbuprs2_ bbuprs3_ bbuprt_ bbuprtbox_ bfkey_ bfprs2_
