@@ -115,6 +115,7 @@ while [[ $# -gt 0 ]]; do
         echo " + mfb bundle-list            : List all types in the current bundle in a raw"
         echo " + mfb bundle-flat            : List all items in the current bundle in a raw"
         echo " + mfb bundle-arch            : List all items in the current bundle with arch and pack options"
+        echo " + mfb bundle-item [item]     : Show parameters used for install purpose"
         echo " + mfb arch                   : Display actual arch value"
         echo " + mfb opts                   : Display actual opts value"
         echo " + mfb sources [+-] [items]   : Display or set bench components"
@@ -139,6 +140,7 @@ while [[ $# -gt 0 ]]; do
         echo " + mfb pack                   : Display the full path of the current pack"
         echo " + mfb nest                   : Set the current directory as the current pack"
         echo " + mfb compile                : Compile through ics files in the current pack"
+        echo " + mfb load                   : Link or re-link through ild files in the current pack"
         echo " + mfb clean                  : Clean and reset the current pack"
       fi
 
@@ -666,6 +668,10 @@ while [[ $# -gt 0 ]]; do
 
     exec bundle.py --cmap
 
+  elif [ "$mfb" == "bundle-item" ]; then
+
+    exec bundle.py --item $1
+
   elif [ "$mfb" == "bundle" ]; then
 
     [[ "$MFBENCH_FUNCTIONS_DIRECTORIES" != "true" ]] && source $MFBENCH_SCRIPTS_FUNCTIONS/directories.sh
@@ -734,14 +740,25 @@ while [[ $# -gt 0 ]]; do
         export MFBENCH_INSTALL_TRACKEXT="shared"
       fi
 
-
       [[ "$tempo_fake" == "true" ]] && continue
 
       [[ "$MFBENCH_FUNCTIONS_INSTALLS" != "true" ]] && source $MFBENCH_SCRIPTS_FUNCTIONS/installs.sh
 
       if [ ! -d $MFBENCH_INSTALL_TARGET ]; then
         echo "Creating directory $MFBENCH_INSTALL_TARGET"
-        mkdir -p $MFBENCH_INSTALL_TARGET
+        \mkdir -p $MFBENCH_INSTALL_TARGET
+      fi
+
+      if [ "$MFBENCH_INSTALL_MKARCH"  == "yes" ]; then
+        if [ ! -d "$MFBENCH_INSTALL/$MFBENCH_ARCH/lib" ]; then
+          echo "Creating directory $MFBENCH_INSTALL/$MFBENCH_ARCH/lib"
+          \mkdir -p $MFBENCH_INSTALL/$MFBENCH_ARCH/lib
+        fi
+        if [ ! -d "$MFBENCH_INSTALL/$MFBENCH_ARCH/lib64" ]; then
+          echo "Link directory $MFBENCH_INSTALL/$MFBENCH_ARCH/lib64"
+          \cd $MFBENCH_INSTALL/$MFBENCH_ARCH
+          \ln -s lib  lib64
+        fi
       fi
 
       if [ "$MFBENCH_INSTALL_MKARCH"  == "yes" ]; then
