@@ -240,7 +240,7 @@ function mfbench_post_install_netcdf_c
 
 function mfbench_post_install_netcdf_fortran
 {
-  export FFLAGS="-fallow-argument-mismatch"
+  [[ "$MFBENCH_ARCH" == *"GNU"* ]] && export FFLAGS="-fallow-argument-mismatch"
   mfbench_post_install_generic_build
 }
 
