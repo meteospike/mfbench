@@ -185,8 +185,9 @@ while [[ $# -gt 0 ]]; do
     export MFBENCH_ROOT=$PWD
     export MFBENCH_PROFILE=${1:-default}
     export MFBENCH_ARCH=$ARCH
-    export MFBENCH_PCUNIT=std
-    export MFBENCH_AUTOPACK=yes
+    export MFBENCH_PCUNIT="std"
+    export MFBENCH_GPUKIND="cc70,cc80"
+    export MFBENCH_AUTOPACK="yes"
 
     export MFBENCH_STORE=$MFBENCH_ROOT/.mfb
     if [ ! -d $MFBENCH_STORE ]; then

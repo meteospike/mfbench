@@ -2,8 +2,6 @@
 # ARCHITECTURE FILE FOR LINUX PLATFORMS WITH INTEL COMPILER AND INTEL MPI
 # =======================================================================
 
-GPU = cc70,cc80
-
 # Fortran (cross-)compiler
 # ------------------------
 

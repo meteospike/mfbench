@@ -14,7 +14,18 @@ function mfbench_compile_1_threads
   done
 }
 
-function mfbench_compile_2_huboff
+function mfbench_compile_2_gpu
+{
+  local ics_file
+  for ics_file in ics_* .gmkfile/*; do
+    echo "Substitute GPU=$MFBENCH_GPUKIND for $PWD/$ics_file"
+    perl -i -pe "
+      s/\\\$GPU\b/$MFBENCH_GPUKIND/go;
+    " $ics_file
+  done
+}
+
+function mfbench_compile_3_huboff
 {
   local ics_file
   for ics_file in $(\ls -1 ics_* 2>/dev/null | fgrep -v ics_packages); do
@@ -26,7 +37,7 @@ function mfbench_compile_2_huboff
   done
 }
 
-function mfbench_compile_3_mkild
+function mfbench_compile_4_mkild
 {
   local ics_file
   for ics_file in $(\ls -1 ics_* 2>/dev/null | fgrep -v ics_packages); do

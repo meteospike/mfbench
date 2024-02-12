@@ -300,7 +300,7 @@ function mfbench_post_install_ial
     \mv $MFBENCH_BUILD/$MFBENCH_INSTALL_TOPDIR $this_name
   else
     echo "Move $this_name/$MFBENCH_INSTALL_NAME as $this_name"
-    \mv $this_name/$MFBENCH_INSTALL_NAME ..
+    \mv $this_name/$MFBENCH_INSTALL_NAME .
     \rmdir $this_name
     \mv $MFBENCH_INSTALL_NAME $this_name
   fi
