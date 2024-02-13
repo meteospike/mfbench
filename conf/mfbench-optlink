@@ -3,5 +3,5 @@ inputs:data
 install:root
 outputs:data
 packs:root
-refs:data
+references:data
 sources:root

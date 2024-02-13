@@ -248,14 +248,17 @@ while [[ $# -gt 0 ]]; do
     export MFBENCH_DATA=$MFBENCH_ROOT/data
     mfbench_mkdir data
 
+    export MFBENCH_NAMELISTS=$MFBENCH_ROOT/data/namelists
+    mfbench_mkdir namelists
+
     export MFBENCH_INPUTS=${MFBENCH_INPUTS:-$MFBENCH_DATA/inputs}
     mfbench_mkdir_ln inputs $MFBENCH_DATA
 
     export MFBENCH_OUTPUTS=${MFBENCH_OUTPUTS:-$MFBENCH_DATA/outputs}
     mfbench_mkdir_ln outputs $MFBENCH_DATA
 
-    export MFBENCH_REFS=${MFBENCH_REFS:-$MFBENCH_DATA/refs}
-    mfbench_mkdir_ln refs $MFBENCH_DATA
+    export MFBENCH_REFERENCES=${MFBENCH_REFERENCES:-$MFBENCH_DATA/references}
+    mfbench_mkdir_ln references $MFBENCH_DATA
 
     if [ -f $MFBENCH_ROOT/VERSION ]; then
       export MFBENCH_XPID=v$(cat $MFBENCH_ROOT/VERSION)
@@ -592,7 +595,7 @@ while [[ $# -gt 0 ]]; do
     while [[ $# -gt 0 ]]; do
       if [ "$1" == "all" ]; then
         shift
-        set -- pack jobs conf inputs outputs refs sources install scripts/functions scripts/wrappers workdir $*
+        set -- pack jobs conf inputs outputs references sources install scripts/functions scripts/wrappers $*
         continue
       fi
       mfbench_listdir $1
@@ -602,10 +605,6 @@ while [[ $# -gt 0 ]]; do
         break
       fi
     done
-
-  elif [ "$mfb" == "data" ]; then
-
-    set -- list inputs outputs refs $*
 
   elif [ "$mfb" == "fypp" ]; then
 
@@ -1084,7 +1083,7 @@ while [[ $# -gt 0 ]]; do
 
   elif [ "$mfb" == "inputs" ]; then
 
-    echo "TODO..."
+    set -- list inputs $*
 
   elif [ "$mfb" == "play" ]; then
 
@@ -1105,7 +1104,7 @@ while [[ $# -gt 0 ]]; do
 
   elif [ "$mfb" == "outputs" ]; then
 
-    echo "TODO..."
+    set -- list outputs $*
 
   elif [ "$mfb" == "tube" ]; then
 
