@@ -52,6 +52,28 @@ IOSERVER_NPROC=$((IOSERVER_NODES*IOSERVER_TASKS))
 
 set +a
 
+# Crude check
+
+if [ ! -d $CONFIG_DATA ]; then
+  echo "Initialisation data directory does not exists" >&2
+  exit 1
+fi
+
+if [ ! -d $CONFIG_CONST ]; then
+  echo "Constants data directory does not exists" >&2
+  exit 1
+fi
+
+if [ ! -f $MASTER_BIN ]; then
+  echo "Master binary does not exists" >&2
+  exit 1
+fi
+
+if [ ! -f $IOSERVER_BIN ]; then
+  echo "IO Server binary does not exists" >&2
+  exit 1
+fi
+
 # Include env settings
 source $MFBENCH_JOBS/include/env.drhook.$CONFIG_DRHOOK.sh
 source $MFBENCH_JOBS/include/env.meminfo.sh
