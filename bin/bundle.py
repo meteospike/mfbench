@@ -44,6 +44,9 @@ else:
         sys.stderr.write(f'Bundle file {bdle_file} not found\n')
         exit(1)
 
+def active_items(atype):
+    return [x for x in bdle_dict[atype].keys() if not bdle_dict[atype][x].get('ignore', False)]
+
 bdle_entries = sorted(bdle_dict.keys())
 bdle_arch = dict()
 
@@ -59,7 +62,7 @@ if opts.list:
         print(' '.join(bdle_entries))
 elif opts.type:
     if opts.type in bdle_dict:
-        print(' '.join(sorted(bdle_dict[opts.type].keys())))
+        print(' '.join(sorted(active_items(opts.type))))
     else:
         sys.stderr.write(f"Type '{opts.type}' not in that bundle\n")
 elif opts.load:
@@ -84,7 +87,7 @@ else:
     else:
         for bdle_type in bdle_entries:
             if bdle_dict[bdle_type]:
-                bdle_flat.extend(bdle_dict[bdle_type].keys())
+                bdle_flat.extend(active_items(bdle_type))
             if opts.item:
                 if bdle_dict[bdle_type] and opts.item in bdle_dict[bdle_type]:
                     if bdle_type == 'tools':
@@ -92,7 +95,8 @@ else:
                     else:
                         print('MFBENCH_INSTALL_MKARCH=yes')
                     this_bdle = bdle_dict[bdle_type][opts.item]
-                    print(f'MFBENCH_INSTALL_NAME={opts.item}')
+                    this_name = this_bdle.get('name', opts.item)
+                    print(f'MFBENCH_INSTALL_NAME={this_name}')
                     print(f'MFBENCH_INSTALL_TYPE={bdle_type}')
                     actual_threads  = this_bdle.get('threads', '4')
                     print(f'MFBENCH_INSTALL_THREADS={actual_threads}')

@@ -94,6 +94,8 @@ while [[ $# -gt 0 ]]; do
         echo " + mfb root                   : Display current mfbench root directory"
         echo " + mfb profile                : Display current profile name"
         echo " + mfb pcunit                 : Display current processing unit family (std/gpu)"
+        echo " + mfb float                  : Display default float precision (single/double)"
+        echo " + mfb methods                : Display list of running methods according to pcunit"
         echo " + mfb path                   : Display actual internal path"
         echo " + mfb env                    : Display current mfbench environment"
         echo " + mfb omp                    : Display current OpenMP environment"
@@ -221,8 +223,7 @@ while [[ $# -gt 0 ]]; do
     export MFBENCH_TRACKDIR=$MFBENCH_STORE/install_tracking
     mfbench_mkdir trackdir
 
-    export TMPDIR=${TMPDIR:-$HOME/tmp}
-    export MFBENCH_TMPDIR=${MFBENCH_TMPDIR:-$TMPDIR}
+    export MFBENCH_TMPDIR=${MFBENCH_TMPDIR:-$HOME/tmp}
     mfbench_mkdir tmpdir
 
     export WORKDIR=${WORKDIR:-$MFBENCH_TMPDIR}
@@ -407,9 +408,14 @@ while [[ $# -gt 0 ]]; do
       exit 1
     fi
 
-    export MFBENCH_PROFILE=$1
-    echo "MFBENCH_PROFILE=$MFBENCH_PROFILE" > $HOME/.mfb_profile
-    echo "Active profile is '$MFBENCH_PROFILE'"
+    if [ "$MFBENCH_PROFILE" == "$1" ]; then
+      echo "Current profile is already '$1'"
+    else
+      export MFBENCH_PROFILE=$1
+      echo "MFBENCH_PROFILE=$MFBENCH_PROFILE" > $HOME/.mfb_profile
+      echo "Active profile is '$MFBENCH_PROFILE'"
+    fi
+
     set --
 
   elif [ "$mfb" == "rmprof" ]; then
@@ -445,11 +451,22 @@ while [[ $# -gt 0 ]]; do
 
     echo $MFBENCH_PCUNIT
 
+  elif [ "$mfb" == "methods" ]; then
+
+    echo ${MFBENCH_METHODS:-$(cat $MFBENCH_CONF/mfbench-methods-$MFBENCH_PCUNIT)}
+
   elif [ "$mfb" == "profdir" ]; then
 
       \cd $MFBENCH_PROFDIR
       pwd
       \ls -l
+
+  elif [ "$mfb" == "cycle" ]; then
+
+    this_cycle=${MFBENCH_CYCLE:-$(cat $MFBENCH_CONF/gmkpack-cycle)}
+    this_cycle=${this_cycle,,}
+    this_cycle=${this_cycle//cy/}
+    echo "cy$this_cycle"
 
   elif [ "$mfb" == "arch" ]; then
 
@@ -467,6 +484,11 @@ while [[ $# -gt 0 ]]; do
       echo $MFBENCH_OPTS
     fi
 
+  elif [ "$mfb" == "float" ]; then
+
+    this_float=${MFBENCH_FLOAT:-$(cat $MFBENCH_CONF/gmkpack-float)}
+    echo "${this_float,,}"
+
   elif [ "$mfb" == "path" ]; then
 
     echo "PATH=$PATH"
@@ -479,6 +501,7 @@ while [[ $# -gt 0 ]]; do
 
     while [[ $# -gt 0 ]]; do
       varname="MFBENCH_${1^^}"
+      varname="${varname//\//_}"
       shift
       if [ "${!varname}" == "" ]; then
         echo "Variable $varname is not set"
@@ -581,7 +604,7 @@ while [[ $# -gt 0 ]]; do
         done
       fi
     else
-      set -- "list" "sources" $*
+      set -- list sources $*
     fi
 
   elif [ "$mfb" == "list" ]; then
@@ -602,7 +625,8 @@ while [[ $# -gt 0 ]]; do
       if [[ $? == 0 ]]; then
         shift
       else
-        break
+        echo "Unable to list this directory" >&2
+        exit 1
       fi
     done
 
@@ -1081,9 +1105,17 @@ while [[ $# -gt 0 ]]; do
     cleanpack
     resetpack
 
+  elif [ "$mfb" == "stamp" ]; then
+
+    echo $(date '+%Y%m%d-%H:%M:%S')$(date '+%N' | cut -c 1-2)
+
   elif [ "$mfb" == "inputs" ]; then
 
     set -- list inputs $*
+
+  elif [ "$mfb" == "namelists" ]; then
+
+    set -- list namelists $*
 
   elif [ "$mfb" == "play" ]; then
 
@@ -1110,6 +1142,17 @@ while [[ $# -gt 0 ]]; do
 
     exec $*
     set --
+
+  elif [ "$mfb" == "mkrundir" ]; then
+
+    export MFBENCH_RUNDIR=${TMPDIR:-$(mktemp -u)}
+    [[ ! -d $MFBENCH_RUNDIR ]] && \mkdir -p $MFBENCH_RUNDIR
+    echo $MFBENCH_RUNDIR
+    set -- setenv
+
+  elif [ "$mfb" == "rundir" ]; then
+
+    echo $MFBENCH_RUNDIR
 
   else
 

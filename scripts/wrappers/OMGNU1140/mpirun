@@ -1,0 +1,34 @@
+#!/bin/bash
+
+newopts=""
+nbslot=0
+ignore=0
+for opt in $*; do
+  case $opt in
+    --) 
+      ignore=1
+      nbslot=$((nbslot+1));;
+    --openmp) 
+      ignore=2;;
+    --nn)
+      mapopt="-n";;
+    --nnp)
+      mapopt="-npernode";;
+    --*)
+      mapopt=$(echo $opt | cut -c2-);;
+    *)
+      mapopt=$opt;;
+  esac
+  if [ $nbslot -eq 2 ]; then
+    newopts="$newopts :"
+    nbslot=0
+  fi
+  if [ $ignore -gt 0 ]; then
+    ignore=$((ignore-1))
+  else
+    newopts="$newopts $mapopt"
+  fi
+done
+
+echo "Calll native mpirun with options: $newopts"
+mpirun $newopts

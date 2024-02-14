@@ -57,7 +57,7 @@ function mfbench_listdir
   local dirfull=${!dirkind}
   if [ -d "$dirfull" ]; then
     \cd $dirfull
-    echo "> $dirfull"
+    echo "$dirfull:"
     local inum=0
     for item in $(\ls -1); do
       inum=$((inum+1))
@@ -77,7 +77,7 @@ function mfbench_listdir_def
   local dirfull=${!dirkind}
   if [ -d "$dirfull" ]; then
     \cd $dirfull
-    echo "> $dirfull"
+    echo "$dirfull:"
     if [ "$2" == "" ]; then
       local ichoice=0
     else

@@ -1,0 +1,6 @@
+#!/bin/bash
+
+export MPIAUTOCONFIG=~marguina/.mpiautorc/mpiauto.PGI.conf
+
+/opt/softs/mpiauto/mpiauto --nouse-slurm-mpi --verbose --wrap --wrap-stdeo $*
+

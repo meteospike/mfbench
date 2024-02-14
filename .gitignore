@@ -1,7 +1,9 @@
 # MFB specifics
 .mfb/
 build/
-data/
+data/inputs
+data/outputs
+data/references
 install/
 packs/
 sources/
