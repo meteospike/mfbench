@@ -1,6 +1,9 @@
 #!/bin/bash
 
-export MPIAUTOCONFIG=~marguina/.mpiautorc/mpiauto.PGI.conf
+set -x
+
+export MPIAUTOCONFIG=~marguina/.mpiautorc/mpiauto.TIME.conf
 
 /opt/softs/mpiauto/mpiauto --nouse-slurm-mpi --verbose --wrap --wrap-stdeo $*
 
+set +x

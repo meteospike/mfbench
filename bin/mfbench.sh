@@ -1145,7 +1145,7 @@ while [[ $# -gt 0 ]]; do
 
   elif [ "$mfb" == "mkrundir" ]; then
 
-    export MFBENCH_RUNDIR=${TMPDIR:-$(mktemp -u)}
+    export MFBENCH_RUNDIR=$MFBENCH_TMPDIR/$(basename $(mktemp -u))
     [[ ! -d $MFBENCH_RUNDIR ]] && \mkdir -p $MFBENCH_RUNDIR
     echo $MFBENCH_RUNDIR
     set -- setenv

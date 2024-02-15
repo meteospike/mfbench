@@ -39,42 +39,39 @@ CONFIG_CATNODE=${MFBENCH_CATNODE:-no}
 # Model executable / number of nodes, tasks per node, threads per task
 MASTER_BIN=$MFBENCH_PACKS/$CONFIG_PACK/bin/MASTERODB
 MASTER_NODES=${SLURM_NNODES:-1}
-MASTER_TASKS=1
-MASTER_THREADS=2
+MASTER_TASKS=4
+MASTER_THREADS=8
 MASTER_NPROC=$((MASTER_NODES*MASTER_TASKS))
 
 # I/O server executable / number of nodes, tasks per node
 IOSERVER_BIN=$MFBENCH_PACKS/$CONFIG_PACK/bin/MASTERODB
 IOSERVER_NODES=1
-IOSERVER_TASKS=1
-IOSERVER_THREADS=2
+IOSERVER_TASKS=2
+IOSERVER_THREADS=4
 IOSERVER_NPROC=$((IOSERVER_NODES*IOSERVER_TASKS))
 
-set +a
+set +ax
 
-# Crude check
-
+# Check some top level elements
 if [ ! -d $CONFIG_DATA ]; then
   echo "Initialisation data directory does not exists" >&2
   exit 1
 fi
-
 if [ ! -d $CONFIG_CONST ]; then
   echo "Constants data directory does not exists" >&2
   exit 1
 fi
-
 if [ ! -f $MASTER_BIN ]; then
   echo "Master binary does not exists" >&2
   exit 1
 fi
-
 if [ ! -f $IOSERVER_BIN ]; then
   echo "IO Server binary does not exists" >&2
   exit 1
 fi
 
 # Include env settings
+set -x
 source $MFBENCH_JOBS/include/env.drhook.$CONFIG_DRHOOK.sh
 source $MFBENCH_JOBS/include/env.meminfo.sh
 source $MFBENCH_JOBS/include/env.openmp.sh
@@ -96,7 +93,9 @@ fi
 $MFBENCH_JOBS/include/namset.$CONFIG_NAME.sh
 
 # Import cioompilers wrapper (including mpirun)
+set +x
 source $MFBENCH_SCRIPTS_WRAPPERS/export_compilers.sh
+set -x
 
 # -----------------------------------------------------------------------------
 # Execution loop on parallel methods
