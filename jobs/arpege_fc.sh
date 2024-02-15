@@ -1,5 +1,4 @@
 #!/bin/bash
-
 # __BATCH_CARD__
 
 # Possibly switch to an other profile
@@ -38,7 +37,7 @@ CONFIG_CATNODE=${MFBENCH_CATNODE:-no}
 
 # Model executable / number of nodes, tasks per node, threads per task
 MASTER_BIN=$MFBENCH_PACKS/$CONFIG_PACK/bin/MASTERODB
-MASTER_NODES=${SLURM_NNODES:-1}
+MASTER_NODES=1
 MASTER_TASKS=4
 MASTER_THREADS=8
 MASTER_NPROC=$((MASTER_NODES*MASTER_TASKS))
@@ -134,8 +133,10 @@ for this_method in $CONFIG_METHODS; do
   # Output directory
   this_out=$MFBENCH_OUTPUTS/$(basename $CONFIG_DATA).$CONFIG_STAMP.$this_method
   \mkdir -p $this_out
-  \cp NODE.001_01 $this_out/$CONFIG_NAME.$this_method.out
-  [[ "$CONFIG_CATNODE" == "yes" ]] &&  cat NODE.001_01
+  if [ -f NODE.001_01 ]; then
+    \cp NODE.001_01 $this_out/$CONFIG_NAME.$this_method.out
+    [[ "$CONFIG_CATNODE" == "yes" ]] &&  cat NODE.001_01
+  fi
 
   # Check the validity of scientific results
   this_ref=$MFBENCH_REFERENCES/$(basename $CONFIG_DATA)

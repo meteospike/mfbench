@@ -997,7 +997,7 @@ while [[ $# -gt 0 ]]; do
       continue
     fi
 
-    echo "Creating base pack $MFBENCH_PACK"
+    echo "Creating dev pack $MFBENCH_PACK"
     [[ "$tempo_fake" == "true" ]] && continue
 
     gmkpack \
