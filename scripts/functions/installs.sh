@@ -209,6 +209,18 @@ function mfbench_post_install_perl
   fi
 }
 
+function mfbench_post_install_fftw
+{
+  if [ -d $MFBENCH_BUILD/$MFBENCH_INSTALL_TOPDIR ]; then
+    \cd $MFBENCH_BUILD/$MFBENCH_INSTALL_TOPDIR
+    set -e
+    ./configure --prefix=$MFBENCH_INSTALL_TARGET
+    make
+    make install
+    set +e
+  fi
+}
+
 function mfbench_post_install_generic_build
 {
   if [ -d $MFBENCH_BUILD/$MFBENCH_INSTALL_TOPDIR ]; then

@@ -4,6 +4,7 @@ function module { eval `/usr/bin/modulecmd bash $*`; }
 
 module purge 2>/dev/null
 module load intel/2018.5.274_mkl_nightly_2019u2 2>/dev/null
+module intelmpi/2018.5.274 2>/dev/null
 module load gcc/5.3.0 2>/dev/null
 
 export TMP=/tmp

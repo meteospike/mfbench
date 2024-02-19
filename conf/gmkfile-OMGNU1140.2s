@@ -20,7 +20,7 @@ CXXNAME = $MFBENCH_COMPILER_MPICXX
 # Native C compiler
 # -----------------
 
-CCNATIVE = $MFBENCH_COMPILER_CC
+CCNATIVE = gcc
 
 # Native C linker flags
 # ---------------------
@@ -118,15 +118,15 @@ GMK_FCFLAGS_SURFEX = -Din_surfex -DSFX_ARO -DSFX_ASC -DSFX_OL -DSFX_TXT -DSFX_FA
 
 GMK_FCFLAGS_SATRAD = -D_RTTOV_DO_DISTRIBCOEF -D_RTTOV_HDF -DWITHOUT_EMOSLIB
 
-GMK_FCFLAGS_IFSAUX = -DHIGHRES -DBLAS -DPOINTER_64 -DBUG_FAGRIB2
+GMK_FCFLAGS_IFSAUX = -DHIGHRES -DBLAS -DPOINTER_64 -DFA_GRIB_NO_VERBOSE
 GMK_CFLAGS_IFSAUX = -DPOINTER_64
 GMK_FCFLAGS_ALGOR = -DBLAS
 GMK_CFLAGS_ODB = -DSTATIC_LINKING -DXPRIVATE=PRIVATE -DINTERCEPT_ALLOC -DUSE_ALLOCA_H -DHAS_LAPACK -fno-var-tracking-assignments -DODB_NMXUPD=4
 GMK_FCFLAGS_ODB = -DHAS_MAGICS -DNEW_MAGICS
 GMK_CFLAGS_BLACKLIST = -DSTATIC_LINKING -DXPRIVATE=PRIVATE -DINTERCEPT_ALLOC -DUSE_ALLOCA_H
 
-GMK_FCFLAGS_TRANS =
-GMK_FCFLAGS_ETRANS =
+GMK_FCFLAGS_TRANS = -DWITH_FFTW
+GMK_FCFLAGS_ETRANS = -DWITH_FFTW
 
 # Fortran (cross-)linker
 # ----------------------
@@ -374,27 +374,27 @@ INCLUDEPATH = $MFBENCH_INSTALL/$MFBENCH_ARCH/include:$MFBENCH_INSTALL/$MFBENCH_A
 # (Cross-) nm command & options for BSD format
 # --------------------------------------------
 
-NMOPTS = /usr/bin/nm
+NMOPTS = nm
 
 # Native awk program
 # ------------------
 
-AWK = /bin/awk
+AWK = awk
 
 # (Cross-)archive
 # ---------------
 
-AR = /usr/bin/ar
+AR = ar
 
 # Native archive
 # --------------
 
-ARNATIVE = /usr/bin/ar
+ARNATIVE = ar
 
 # Native preprocessor
 # -------------------
 
-CPP = /usr/bin/cpp
+CPP = cpp
 
 # cmake executable
 # ----------------

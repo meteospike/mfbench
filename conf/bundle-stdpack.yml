@@ -43,6 +43,9 @@ libraries:
     eigen:
         version : '3.4.0'
 
+    fftw:
+        version : '3.3.4'
+
 hub:
 
     oops_src:
