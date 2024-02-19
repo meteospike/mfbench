@@ -269,8 +269,16 @@ EOF
       \mkdir -p $MFBENCH_SUPPORT/link
     fi
     local binconf
-    for binconf in $(< $MFBENCH_CONF/gmkpack-binaries); do
-      \cp -r link/$binconf $MFBENCH_SUPPORT/link/
+    for binconf in $(< $MFBENCH_CONF/gmkpack-binaries-$MFBENCH_PCUNIT); do
+      if [ -d $MFBENCH_SUPPORT/link/$binconf ]; then
+        echo "Warning: link specifications for '$binconf' already defined" >&2
+      else
+        if [ -d link/$binconf ]; then
+          \cp -r link/$binconf $MFBENCH_SUPPORT/link/
+        else
+          echo "Warning: link specifications for '$binconf' does not exist" >&2
+        fi
+      fi
     done
 
     export GMK_SUPPORT=$MFBENCH_SUPPORT

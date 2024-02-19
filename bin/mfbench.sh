@@ -934,7 +934,7 @@ while [[ $# -gt 0 ]]; do
       -r $this_cycle  \
       -b $this_branch \
       -n $this_packid \
-      -l $MFBENCH_ARCH -o $MFBENCH_OPTS -a -K -p $(cat $MFBENCH_CONF/gmkpack-binaries)
+      -l $MFBENCH_ARCH -o $MFBENCH_OPTS -a -K -p $(cat $MFBENCH_CONF/gmkpack-binaries-$MFBENCH_PCUNIT)
 
     if [ $? -ne 0 ]; then
       echo "Could not complete '$mfb'" >&2
@@ -1006,7 +1006,7 @@ while [[ $# -gt 0 ]]; do
       -u $this_branch \
       -n $this_packid \
       -v $base_packid \
-      -l $MFBENCH_ARCH -o $MFBENCH_OPTS -p $(cat $MFBENCH_CONF/gmkpack-binaries)
+      -l $MFBENCH_ARCH -o $MFBENCH_OPTS -p $(cat $MFBENCH_CONF/gmkpack-binaries-$MFBENCH_PCUNIT)
 
     export MFBENCH_LASTPACK=$MFBENCH_PACK
     set -- setenv postpack
@@ -1073,7 +1073,7 @@ while [[ $# -gt 0 ]]; do
     build_prefix=$1
     shift
 
-    [[ $# -eq 0 ]] && set -- $(cat $MFBENCH_CONF/gmkpack-packages $MFBENCH_CONF/gmkpack-binaries)
+    [[ $# -eq 0 ]] && set -- $(cat $MFBENCH_CONF/gmkpack-packages $MFBENCH_CONF/gmkpack-binaries-$MFBENCH_PCUNIT)
 
     while [[ $# -gt 0 ]]; do
       this_builder="${build_prefix}_$1"
