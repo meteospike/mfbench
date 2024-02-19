@@ -1,13 +1,23 @@
 #!/bin/bash
-# __BATCH_CARD__
+#SBATCH --job-name=arp
+#SBATCH --partition=normal256
+#SBATCH --export=NONE
+#SBATCH --time=00:05:00
+#SBATCH --mem=247000
+#SBATCH --nodes=2
+#SBATCH --ntasks-per-node=32
+#SBATCH --cpus-per-task=2
+#SBATCH --exclusiv
+#SBATCH --verbose
+#SBATCH --no-requeue
 
-# Possibly switch to an other profile
+# Select your profile
 mfb switch default
 
 # Get the actual rundir (either from $TMPDIR var or by construct)
 mfb mkrundir
 
-# Load and display current mfb profile
+# Load and display current mfb profile variables
 . mfb env
 
 # Move to current running directory
@@ -38,15 +48,15 @@ CONFIG_CATNODE=${MFBENCH_CATNODE:-no}
 # Model executable / number of nodes, tasks per node, threads per task
 MASTER_BIN=$MFBENCH_PACKS/$CONFIG_PACK/bin/MASTERODB
 MASTER_NODES=1
-MASTER_TASKS=4
-MASTER_THREADS=8
+MASTER_TASKS=32
+MASTER_THREADS=2
 MASTER_NPROC=$((MASTER_NODES*MASTER_TASKS))
 
 # I/O server executable / number of nodes, tasks per node
 IOSERVER_BIN=$MFBENCH_PACKS/$CONFIG_PACK/bin/MASTERODB
 IOSERVER_NODES=1
-IOSERVER_TASKS=2
-IOSERVER_THREADS=4
+IOSERVER_TASKS=1
+IOSERVER_THREADS=1
 IOSERVER_NPROC=$((IOSERVER_NODES*IOSERVER_TASKS))
 
 set +ax
