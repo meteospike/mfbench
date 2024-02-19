@@ -41,6 +41,7 @@ CONFIG_DRHOOK=on
 CONFIG_VECTOR=off
 CONFIG_METHODS=$(mfb methods)
 CONFIG_STAMP=$(mfb stamp)
+CONFIG_PROCINFO=off
 CONFIG_CATNODE=${MFBENCH_CATNODE:-no}
 # -----------------------------------------------------------------------------
 

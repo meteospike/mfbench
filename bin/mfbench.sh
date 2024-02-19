@@ -1088,6 +1088,11 @@ while [[ $# -gt 0 ]]; do
 
     [[ -d hub/local/build ]] && \rm -rf hub/local/build
 
+    if [ "$MFBENCH_PCUNIT" = "gpu" ]; then
+      echo "Creating 'parallelmethod' files"
+      $MFBENCH_SCRIPTS/tools/parallelmethod.pl
+    fi
+
   elif [ "$mfb" == "compile" ]; then
 
     tempo_private=true
