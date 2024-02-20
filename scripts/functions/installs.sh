@@ -209,7 +209,7 @@ function mfbench_post_install_perl
   fi
 }
 
-function mfbench_post_install_fftw
+function mfbench_post_install_fftw_sp
 {
   if [ -d $MFBENCH_BUILD/$MFBENCH_INSTALL_TOPDIR ]; then
     \cd $MFBENCH_BUILD/$MFBENCH_INSTALL_TOPDIR
@@ -217,10 +217,18 @@ function mfbench_post_install_fftw
     ./configure --prefix=$MFBENCH_INSTALL_TARGET --enable-fortran --enable-single
     make
     make install
-#    make clean
-#    ./configure --prefix=$MFBENCH_INSTALL_TARGET --enable-fortran
-#    make
-#    make install
+    set +e
+  fi
+}
+
+function mfbench_post_install_fftw_dp
+{
+  if [ -d $MFBENCH_BUILD/$MFBENCH_INSTALL_TOPDIR ]; then
+    \cd $MFBENCH_BUILD/$MFBENCH_INSTALL_TOPDIR
+    set -e
+    ./configure --prefix=$MFBENCH_INSTALL_TARGET --enable-fortran
+    make
+    make install
     set +e
   fi
 }

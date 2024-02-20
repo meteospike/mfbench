@@ -73,8 +73,8 @@ FIXED_FRTFLAG = -ffixed-form
 # Optimized compilation flag
 # --------------------------
 
-OPT_FRTFLAGS = -O2 -fno-var-tracking-assignments
-OPT_VCCFLAGS = -O2
+OPT_FRTFLAGS = -O1 -fno-var-tracking-assignments
+OPT_VCCFLAGS = -O1
 
 # Debugging compilation flag
 # --------------------------

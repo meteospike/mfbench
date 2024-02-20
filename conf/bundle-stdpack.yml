@@ -43,7 +43,12 @@ libraries:
     eigen:
         version : '3.4.0'
 
-    fftw:
+    fftw-sp:
+        name    : fftw
+        version : '3.3.4'
+
+    fftw-dp:
+        name    : fftw
         version : '3.3.4'
 
 hub:

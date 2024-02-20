@@ -26,6 +26,10 @@ mfb mkrundir
 set -aex
 
 # -----------------------------------------------------------------------------
+# Ultimate overwriting of the profile
+MFBENCH_FOO=2
+
+# -----------------------------------------------------------------------------
 # Actual configuration (most important features)
 CONFIG_NAME=arpege_fc
 CONFIG_GRID=${MFBENCH_GRID:-tl0048}
@@ -34,7 +38,7 @@ CONFIG_FLOAT=$(mfb float)
 CONFIG_PACK=${MFBENCH_PACK:-${CONFIG_CYCLE//cy/}_rapsmain.01.$MFBENCH_ARCH.$MFBENCH_OPTS}
 CONFIG_DATA=$MFBENCH_INPUTS/$CONFIG_CYCLE.$CONFIG_NAME.$CONFIG_GRID
 CONFIG_CONST=$MFBENCH_INPUTS/$CONFIG_CYCLE.constants.expanded
-CONFIG_STOP=3
+CONFIG_STOP=24
 CONFIG_TSTEP=auto
 CONFIG_JPXLAT="-"
 CONFIG_DRHOOK=on

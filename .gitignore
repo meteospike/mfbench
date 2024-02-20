@@ -8,6 +8,8 @@ install/
 packs/
 sources/
 support/arch/gmkfile-*
+*.out
+*.dbug
 *-SELECT.*
 
 # Byte-compiled / optimized / DLL files

@@ -373,6 +373,12 @@ while [[ $# -gt 0 ]]; do
 
     echo $MFBENCH_PROFILE
 
+
+  elif [ "$mfb" == "profiles" ]; then
+
+    \cd $MFBENCH_STORE
+    \ls -1d profile_* | cut -d "_" -f 2 | sort -u
+
   elif [ "$mfb" == "clone" ]; then
 
     if [ $# -ne 1 ]; then
@@ -1116,7 +1122,7 @@ while [[ $# -gt 0 ]]; do
 
   elif [ "$mfb" == "stamp" ]; then
 
-    echo $(date '+%Y%m%d-%H:%M:%S')$(date '+%N' | cut -c 1-2)
+    echo $(date '+D%Y%m%d_T%H%M%S')$(date '+%N' | cut -c 1-2)
 
   elif [ "$mfb" == "inputs" ]; then
 
