@@ -20,7 +20,7 @@ CXXNAME = $MFBENCH_COMPILER_MPICXX
 # Native C compiler
 # -----------------
 
-CCNATIVE = $MFBENCH_COMPILER_CC
+CCNATIVE = $MFBENCH_COMPILER_CC -diag-disable=10441
 
 # Native C linker flags
 # ---------------------
@@ -87,7 +87,7 @@ DBG_FRTFLAGS = -g -O0
 BCD_FRTFLAGS = -check bounds -mcmodel=medium
 
 # NaN pre-initialisation flag
-# ----------------------------
+# ---------------------------
 
 NAN_FRTFLAGS = -init=arrays,snan -fp-stack-check -ftrapuv -fpe0 -fp-speculation=strict -check uninit -check pointers
 
@@ -105,28 +105,29 @@ LIST_EXTENSION = lst
 # Additive compilation flags
 # --------------------------
 
-MACROS_FRT = -DLINUX -DLITTLE_ENDIAN -DLITTLE -DPARKIND1_SINGLE -DADDRESS64 -DGRIB_API_1
-MACROS_CC = -DLINUX -DLITTLE_ENDIAN -DLITTLE -DPARKIND1_SINGLE -DGRIB_API_1
+MACROS_FRT = -DLINUX -DLITTLE_ENDIAN -DLITTLE -DADDRESS64 -DPARKIND1_SINGLE
+MACROS_CC = -DLINUX -DLITTLE_ENDIAN -DLITTLE -DPARKIND1_SINGLE
 MACROS_CXX = -std=c++11
 MACROS_BL95 = -DLINUX -DLITTLE_ENDIAN -DLITTLE -DIS_MAIN_PROG -DSTATIC_LINKING
 MACROS_ODB98 = -DLINUX -DLITTLE_ENDIAN -DLITTLE -DXPRIVATE=PRIVATE -UINTERCEPT_ALLOC -UUSE_ALLOCA_H -DWITHOUT_OML
 
-GMK_FCFLAGS_MPA =
-GMK_FCFLAGS_PHYEX =
-GMK_FCFLAGS_MSE = -DSFX_FA
-GMK_FCFLAGS_SURFEX = -Din_surfex -DSFX_ARO -DSFX_ASC -DSFX_OL -DSFX_TXT -DSFX_FA -DSFX_LFI -DARO -DOL -DASC -DTXT -DFA -DLFI
-
 GMK_FCFLAGS_SATRAD = -D_RTTOV_DO_DISTRIBCOEF -D_RTTOV_HDF -DWITHOUT_EMOSLIB
 
-GMK_FCFLAGS_IFSAUX = -DHIGHRES -DBLAS -DPOINTER_64 -DBUG_FAGRIB2
-GMK_CFLAGS_IFSAUX = -DPOINTER_64
+GMK_FCFLAGS_SURFEX = -Din_surfex -DSFX_ARO -DSFX_ASC -DSFX_OL -DSFX_TXT -DSFX_FA -DSFX_LFI -DARO -DOL -DASC -DTXT -DFA -DLFI
+GMK_FCFLAGS_MSE = -DSFX_FA
+GMK_FCFLAGS_MPA =
+GMK_FCFLAGS_PHYEX =
+GMK_FCFLAGS_RADIATION =
+
+GMK_FCFLAGS_ARPIFS = -DDISABLE_GPU_SUPPORT
+GMK_FCFLAGS_IFSAUX = -DHIGHRES -DBLAS -DFA_GRIB_NO_VERBOSE
 GMK_FCFLAGS_ALGOR = -DBLAS
-GMK_CFLAGS_ODB = -DSTATIC_LINKING -DXPRIVATE=PRIVATE -DINTERCEPT_ALLOC -DUSE_ALLOCA_H -DHAS_LAPACK -fno-var-tracking-assignments -DODB_NMXUPD=4
-GMK_FCFLAGS_ODB = -DHAS_MAGICS -DNEW_MAGICS
+GMK_CFLAGS_IFSAUX = -DPOINTER_64
+GMK_CFLAGS_ODB = -DSTATIC_LINKING -DXPRIVATE=PRIVATE -DINTERCEPT_ALLOC -DUSE_ALLOCA_H -DCANARI -DHAS_LAPACK -DNO_CURSES -DODB_NMXUPD=4
 GMK_CFLAGS_BLACKLIST = -DSTATIC_LINKING -DXPRIVATE=PRIVATE -DINTERCEPT_ALLOC -DUSE_ALLOCA_H
 
-GMK_FCFLAGS_TRANS =
-GMK_FCFLAGS_ETRANS =
+GMK_FCFLAGS_TRANS = -DWITH_FFTW
+GMK_FCFLAGS_ETRANS = -DWITH_FFTW
 
 # Fortran (cross-)linker
 # ----------------------
@@ -141,7 +142,7 @@ LNK_MPI = $MFBENCH_COMPILER_MPIF90
 # cc (cross-)linker
 # -----------------
 
-LNK_CC =  $MFBENCH_COMPILER_MPICC -ldl -lrt -lstdc++ -fopenmp
+LNK_CC =  $MFBENCH_COMPILER_MPICC -qopenmp -shared-intel -lrt -lstdc++
 
 # CXX (cross-)linker (for mixed langages c++ and fortran)
 # -------------------------------------------------------
@@ -151,12 +152,12 @@ LNK_CXX = $MFBENCH_COMPILER_MPICXX -lstdc++
 # Fortran linking flags
 # ----------------------
 
-LNK_FLAGS = -fopenmp -ffast-math -ldl -lrt -lstdc++ -Wl,-rpath,$MFBENCH_INSTALL/$MFBENCH_ARCH/lib
+LNK_FLAGS = -v -fp-stack-check -qopenmp -qopenmp-threadprivate compat -shared-intel -lrt -lstdc++ -Wl,-rpath,$MFBENCH_INSTALL/$MFBENCH_ARCH/lib
 
 # Additional linking flags to LNK_FLAGS for c++ executable
 # --------------------------------------------------------
 
-LNK_CXX_FLAGS = 
+LNK_CXX_FLAGS =
 
 # flags for executable targets
 # ----------------------------
@@ -168,14 +169,14 @@ LNK_EXEC =
 
 LNK_SOLIB = -shared -o a.out
 
-# Fortran Flag for start/end group libraries 
+# Fortran Flag for start/end group libraries
 # ------------------------------------------
 
 LNK_STARTG = -Wl,--start-group
 LNK_ENDG   = -Wl,--end-group
 
-# Flags for linking with whole static libraries or not
-# ----------------------------------------------------
+# Flag for linking with whole static libraries
+# --------------------------------------------
 
 LNK_WHOLE_ARCHIVE = -Wl,-whole-archive
 LNK_NO_WHOLE_ARCHIVE = -Wl,-no-whole-archive
@@ -525,17 +526,17 @@ GMK_ICS = ics_
 # Submission cards : number of nodes
 # ----------------------------------
 
-GMK_NQS_NODES = 
+GMK_NQS_NODES = #SBATCH --cpus-per-task=10
 
 # Submission cards : large memory
 # -------------------------------
 
-GMK_NQS_LARGE = 
+GMK_NQS_LARGE = #SBATCH --mem-per-cpu=1000
 
 # Submission cards : time limit
 # -----------------------------
 
-GMK_NQS_TIME  = 
+GMK_NQS_TIME  = #SBATCH --time=01:45:00
 
 # Submission cards : output file KEY
 # ----------------------------------
@@ -554,14 +555,12 @@ GMK_NQS_JOBID =
 
 # Submission cards : other directives
 # -----------------------------------
- 
-GMK_NQS_OTHER = 
-GMK_NQS_OTHER = 
-GMK_NQS_OTHER = 
-GMK_NQS_OTHER = 
-GMK_NQS_OTHER = 
-GMK_NQS_OTHER = 
-GMK_NQS_OTHER = 
+
+GMK_NQS_OTHER = #SBATCH --partition=login
+GMK_NQS_OTHER = #redefine the temporary directory because in batch mode TMPDIR is set after the .bash_profile is sourced :
+GMK_NQS_OTHER = if [ "$SLURM_JOB_PARTITION" ] ; then export GMKTMP=/dev/shm/$LOGNAME/slurm ; fi
+GMK_NQS_OTHER = # NOTICE : use at most 64 cpus/task. Approximate time for a whole recompilation with 10 cpus : 01:20:00
+
 
 # Compiler feature extension for aeolus software
 # ----------------------------------------------

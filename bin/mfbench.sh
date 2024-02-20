@@ -190,6 +190,7 @@ while [[ $# -gt 0 ]]; do
     export MFBENCH_PCUNIT="std"
     export MFBENCH_GPUKIND="cc70,cc80"
     export MFBENCH_AUTOPACK="yes"
+    export MFBENCH_RMBUILD="yes"
 
     export MFBENCH_STORE=$MFBENCH_ROOT/.mfb
     if [ ! -d $MFBENCH_STORE ]; then
@@ -1086,7 +1087,10 @@ while [[ $# -gt 0 ]]; do
       fi
     done
 
-    [[ -d hub/local/build ]] && \rm -rf hub/local/build
+    if [[ "$MFBENCH_RMBUILD" == "yes"  && -d hub/local/build ]]; then
+      echo "Removing build directory '$PWD/hub/local/build'"
+      \rm -rf hub/local/build
+    fi
 
     if [ "$MFBENCH_PCUNIT" = "gpu" ]; then
       echo "Creating 'parallelmethod' files"

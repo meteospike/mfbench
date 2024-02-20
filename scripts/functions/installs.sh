@@ -214,9 +214,13 @@ function mfbench_post_install_fftw
   if [ -d $MFBENCH_BUILD/$MFBENCH_INSTALL_TOPDIR ]; then
     \cd $MFBENCH_BUILD/$MFBENCH_INSTALL_TOPDIR
     set -e
-    ./configure --prefix=$MFBENCH_INSTALL_TARGET
+    ./configure --prefix=$MFBENCH_INSTALL_TARGET --enable-fortran --enable-single
     make
     make install
+#    make clean
+#    ./configure --prefix=$MFBENCH_INSTALL_TARGET --enable-fortran
+#    make
+#    make install
     set +e
   fi
 }
