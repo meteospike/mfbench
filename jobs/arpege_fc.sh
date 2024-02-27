@@ -173,3 +173,14 @@ done
 
 # Intra comparaisons
 \cd $MFBENCH_RUNDIR
+
+for this_cmp in $(< $MFBENCH_CONF/mfbench-methods-cmp); do
+  diff1=$(echo $this_cmp | cut -d ":" -f1)
+  diff2=$(echo $this_cmp | cut -d ":" -f2)
+  if [[ -f "$diff1/NODE.001_01" && -f "$diff2/NODE.001_01" ]]; then
+    echo "DIFF NODE $diff1 / $diff2"
+    diffNODE $diff1/NODE.001_01 $diff2/NODE.001_01
+  else
+    echo "Could not find $diff1 output or $diff2 output" >&2
+  fi
+done

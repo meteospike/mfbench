@@ -1,0 +1,4 @@
+nominal:openmp
+nominal:openmpsinglecolumn
+nominal:openaccsinglecolumn
+openmpsinglecolumn:openaccsinglecolumn

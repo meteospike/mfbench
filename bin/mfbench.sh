@@ -17,50 +17,8 @@
 #  % mfb off (possibly as a source shell)
 
 isnumber='^[0-9]+$'
-isbundle='^bundle\-'
-isyaml='\.ya?ml$'
 
-function check_private {
-  if [ "$tempo_private" == "true" ]; then
-    tempo_private=false
-  else
-    echo "Subcommand '$mfb' is internal only" >&2
-    exit 1
-  fi
-}
-
-function mandatory_var_raw {
-  for this_var in $*; do
-    actual_var=MFBENCH_${this_var^^}
-    if [ "${!actual_var}" == "" ]; then
-      echo "Variable $actual_var is not set" >&2
-      exit 1
-    fi
-  done
-}
-
-function mandatory_var_msg {
-  this_msg=$1
-  shift
-  for this_var in $*; do
-    actual_var=MFBENCH_${this_var^^}
-    if [ "${!actual_var}" == "" ]; then
-      echo "Variable $actual_var must be defined for $this_msg" >&2
-      exit 1
-    fi
-  done
-}
-
-function mfbench_logfile {
-  base_name=$1
-  last_logfile=$(\ls -1 $base_name.[0-9][0-9].log 2>/dev/null | tail -1)
-  if [ "$last_logfile" == "" ]; then
-    this_num="01"
-  else
-    this_num=$(echo $last_logfile | cut -d "." -f2 | perl -ne 'printf "%02d", int($_)+1;')
-  fi
-  echo "$base_name.$this_num.log"
-}
+source $(dirname $(realpath $0))/utils.sh
 
 if [[ $# == 0 ]]; then
     set -- help
@@ -92,8 +50,6 @@ while [[ $# -gt 0 ]]; do
         echo " + mfb on                     : Activate a session"
         echo " + mfb off                    : Turn off current session"
         echo " + mfb root                   : Display current mfbench root directory"
-        echo " + mfb profile                : Display current profile name"
-        echo " + mfb pcunit                 : Display current processing unit family (std/gpu)"
         echo " + mfb float                  : Display default float precision (single/double)"
         echo " + mfb methods                : Display list of running methods according to pcunit"
         echo " + mfb path                   : Display actual internal path"
@@ -118,8 +74,6 @@ while [[ $# -gt 0 ]]; do
         echo " + mfb bundle-flat            : List all items in the current bundle in a raw"
         echo " + mfb bundle-arch            : List all items in the current bundle with arch and pack options"
         echo " + mfb bundle-item [item]     : Show parameters used for install purpose"
-        echo " + mfb arch                   : Display actual arch value"
-        echo " + mfb opts                   : Display actual opts value"
         echo " + mfb sources [+-] [items]   : Display or set bench components"
         echo " + mfb cmake                  : Check CMake path and version"
         echo " + mfb fypp                   : Check Fypp path and version"
@@ -369,11 +323,6 @@ while [[ $# -gt 0 ]]; do
     \cd $MFBENCH_ROOT
     pwd
 
-  elif [ "$mfb" == "profile" ]; then
-
-    echo $MFBENCH_PROFILE
-
-
   elif [ "$mfb" == "profiles" ]; then
 
     \cd $MFBENCH_STORE
@@ -454,10 +403,6 @@ while [[ $# -gt 0 ]]; do
       \rm -f $link_select
     done
 
-  elif [ "$mfb" == "pcunit" ]; then
-
-    echo $MFBENCH_PCUNIT
-
   elif [ "$mfb" == "methods" ]; then
 
     echo ${MFBENCH_METHODS:-$(cat $MFBENCH_CONF/mfbench-methods-$MFBENCH_PCUNIT)}
@@ -474,22 +419,6 @@ while [[ $# -gt 0 ]]; do
     this_cycle=${this_cycle,,}
     this_cycle=${this_cycle//cy/}
     echo "cy$this_cycle"
-
-  elif [ "$mfb" == "arch" ]; then
-
-    if [ "$MFBENCH_ARCH" == "" ]; then
-      echo "Variable MFBENCH_ARCH is not set"
-    else
-      echo $MFBENCH_ARCH
-    fi
-
-  elif [ "$mfb" == "opts" ]; then
-
-    if [ "$MFBENCH_OPTS" == "" ]; then
-      echo "Variable MFBENCH_OPTS is not set"
-    else
-      echo $MFBENCH_OPTS
-    fi
 
   elif [ "$mfb" == "float" ]; then
 
@@ -1165,13 +1094,16 @@ while [[ $# -gt 0 ]]; do
     echo $MFBENCH_RUNDIR
     set -- setenv
 
-  elif [ "$mfb" == "rundir" ]; then
-
-    echo $MFBENCH_RUNDIR
-
   else
 
-    echo "Warning: subcommand '$mfb' not found" >&2
+    varname="MFBENCH_${mfb^^}"
+    varname="${varname//\//_}"
+    if [ "${!varname}" == "" ]; then
+      echo "Warning: subcommand '$mfb' not found" >&2
+      exit 1
+    else
+      echo "${!varname}"
+    fi
 
  fi
 
