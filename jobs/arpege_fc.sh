@@ -58,7 +58,7 @@ MASTER_THREADS=2
 MASTER_NPROC=$((MASTER_NODES*MASTER_TASKS))
 
 # I/O server executable / number of nodes, tasks per node
-IOSERVER_BIN=$MFBENCH_PACKS/$CONFIG_PACK/bin/MASTERODB
+IOSERVER_BIN=$MASTER_BIN
 IOSERVER_NODES=1
 IOSERVER_TASKS=1
 IOSERVER_THREADS=1
@@ -156,7 +156,7 @@ for this_method in $CONFIG_METHODS; do
   # Check the validity of scientific results
   this_ref=$MFBENCH_REFERENCES/$(basename $CONFIG_DATA)
   if [ -d $this_ref ]; then
-    diffNODE $this_ref/$CONFIG_NAME.$this_method.out NODE.001_01 | tee $this_out/$CONFIG_NAME.$this_method.diff
+    $MFBENCH_SCRIPTS/tools/diffNODE $this_ref/$CONFIG_NAME.$this_method.out NODE.001_01 | tee $this_out/$CONFIG_NAME.$this_method.diff
   else
     echo "Warning: could not find any reference for this configuration" >&2
   fi
@@ -179,7 +179,7 @@ for this_cmp in $(< $MFBENCH_CONF/mfbench-methods-cmp); do
   diff2=$(echo $this_cmp | cut -d ":" -f2)
   if [[ -f "$diff1/NODE.001_01" && -f "$diff2/NODE.001_01" ]]; then
     echo "DIFF NODE $diff1 / $diff2"
-    diffNODE $diff1/NODE.001_01 $diff2/NODE.001_01
+    $MFBENCH_SCRIPTS/tools/diffNODE $diff1/NODE.001_01 $diff2/NODE.001_01
   else
     echo "Could not find $diff1 output or $diff2 output" >&2
   fi
