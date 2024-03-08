@@ -116,7 +116,11 @@ else:
                         actual_source  = this_bdle.get('source', actual_topdir) + '.' + actual_archive
                         print(f'MFBENCH_INSTALL_TOPDIR={actual_topdir}')
                         print(f'MFBENCH_INSTALL_SOURCE={actual_source}')
-                    if 'gmkpack' in this_bdle:
+                    if this_bdle.get('vimpack', False):
+                        print('MFBENCH_INSTALL_GMKPACK=yes')
+                        print('MFBENCH_INSTALL_VIMPACK=yes')
+                        print('MFBENCH_INSTALL_TARGET=$MFBENCH_PACKS/$MFBENCH_PACK')
+                    elif 'gmkpack' in this_bdle:
                         print('MFBENCH_INSTALL_GMKPACK=yes')
                         print(f'MFBENCH_INSTALL_TARGET=$MFBENCH_PACKS/$MFBENCH_PACK/{this_bdle["gmkpack"]}')
                     else:

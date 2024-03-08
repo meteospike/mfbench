@@ -106,6 +106,18 @@ function mfbench_install_from_git
   git clone $git_select $MFBENCH_INSTALL_GIT $MFBENCH_INSTALL_NAME
 }
 
+function mfbench_install_with_gitpack
+{
+  \cd $MFBENCH_INSTALL_TARGET
+  local git_select
+  if [ "$MFBENCH_INSTALL_VERSION" == "" ]; then
+    git_select=''
+  else
+    git_select="--branch $MFBENCH_INSTALL_VERSION"
+  fi
+  gitpack --init --repository $MFBENCH_INSTALL_GIT $git_select
+}
+
 function mfbench_install_generic
 {
   if [[ "$MFBENCH_INSTALL_TYPE" != "tools" && "$MFBENCH_ARCH" == "" ]]; then
@@ -119,8 +131,11 @@ function mfbench_install_generic
     if [[ "$MFBENCH_INSTALL_GIT" == "" ]]; then
       echo "Install from archive $MFBENCH_INSTALL_SOURCE"
       mfbench_install_from_archive
+    elif [[ "$MFBENCH_INSTALL_VIMPACK" == "yes" ]]; then
+      echo "Install from repository $MFBENCH_INSTALL_GIT (gitpack)"
+      mfbench_install_with_gitpack
     else
-      echo "Install from repository $MFBENCH_INSTALL_GIT"
+      echo "Install from repository $MFBENCH_INSTALL_GIT (clone)"
       mfbench_install_from_git
     fi
   fi
@@ -326,7 +341,9 @@ function mfbench_post_install_ial
   local this_name=$(basename $MFBENCH_INSTALL_TARGET)
   \cd $(dirname $MFBENCH_INSTALL_TARGET)
 
-  if [[ "$MFBENCH_INSTALL_GIT" == "" ]]; then
+  if [[ "$MFBENCH_INSTALL_VIMPACK" == "yes" ]]; then
+    echo "Post install with gitpack is clear"
+  elif [[ "$MFBENCH_INSTALL_GIT" == "" ]]; then
     echo "Move $MFBENCH_BUILD/$MFBENCH_INSTALL_TOPDIR as $MFBENCH_INSTALL_TARGET"
     \rm -rf $this_name
     \mv $MFBENCH_BUILD/$MFBENCH_INSTALL_TOPDIR $this_name

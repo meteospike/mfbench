@@ -82,20 +82,21 @@ hub:
 
 main:
 
-    ial:
+    ial_alt:
         name    : ial
+        ignore  : True
+        topdir  : IAL
         version : 49t0_rapslite.10
         archive : tgz
-        topdir  : IAL
         source  : ial-49t0_rapsgpu.01
         gmkpack : 'src/local'
 
-    ial_alt:
-        ignore  : True
+    ial:
         name    : ial
+        topdir  : IAL
         git     : https://github.com/pmarguinaud/IAL.git
         version : openacccpglagstack84
-        gmkpack : 'src/local'
+        vimpack : True
 
 dummies:
 

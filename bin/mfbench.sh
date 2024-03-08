@@ -326,7 +326,9 @@ while [[ $# -gt 0 ]]; do
   elif [ "$mfb" == "profiles" ]; then
 
     \cd $MFBENCH_STORE
-    \ls -1d profile_* | cut -d "_" -f 2 | sort -u
+    for this_prof in $(\ls -1d profile_* | cut -d "_" -f 2 | sort -u); do
+      printf "%-16s %s\n" $this_prof "$(mfbench_shortview $this_prof)"
+    done
 
   elif [ "$mfb" == "clone" ]; then
 
