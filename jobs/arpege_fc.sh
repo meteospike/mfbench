@@ -1,18 +1,20 @@
 #!/bin/bash
 #SBATCH --job-name=arp
-#SBATCH --partition=normal256
+#SBATCH --partition=ndl
+## #SBATCH --partition=normal256
 #SBATCH --export=NONE
 #SBATCH --time=00:05:00
 #SBATCH --mem=247000
-#SBATCH --nodes=2
-#SBATCH --ntasks-per-node=32
-#SBATCH --cpus-per-task=2
 #SBATCH --exclusiv
 #SBATCH --verbose
 #SBATCH --no-requeue
+#SBATCH --nodes=1
+#SBATCH --gres=gpu:4
+## #SBATCH --ntasks-per-node=32
+## #SBATCH --cpus-per-task=2
 
 # Select your profile
-mfb switch default
+mfb switch gputest
 
 # Get the actual rundir (either from $TMPDIR var or by construct)
 mfb mkrundir
@@ -152,22 +154,27 @@ for this_method in $CONFIG_METHODS; do
   \rm -f lsynchost.txt
   source $MFBENCH_JOBS/include/setup.$this_method.sh
 
+  # Output directory
+  this_out=$CONFIG_OUTS/$CONFIG_STAMP.$this_method
+  \mkdir -p $this_out
+
+  # Log actual environement
+  env | fgrep -e CONFIG_ -e MFBENCH_ -e MASTER_ -e IOSERVER_ | sort -u > $this_out/experiment.env
+
   # Run
   \ls -lrt
   $MFBENCH_COMPILER_MPIRUN \
        --nn $MASTER_NODES   --nnp $MASTER_TASKS   --openmp $MASTER_THREADS  -- $MASTER_BIN \
     -- --nn $IOSERVER_NODES --nnp $IOSERVER_TASKS --openmp $IOSERVER_THREADS -- $IOSERVER_BIN
 
-  # Output directory
-  this_out=$MFBENCH_OUTS/$CONFIG_STAMP.$this_method
-  \mkdir -p $this_out
+  # Save node output
   if [ -f NODE.001_01 ]; then
     \cp NODE.001_01 $this_out/$CONFIG_NAME.$this_method.node.001
     [[ "$CONFIG_CATNODE" == "yes" ]] &&  cat NODE.001_01
   fi
 
   # Check the validity of scientific results
-  this_ref=$MFBENCH_REFS
+  this_ref=$CONFIG_REFS
   if [ -d $this_ref ]; then
     echo "$this_ref/NODE.001_01" > $this_out/$CONFIG_NAME.$this_method.ref
     $MFBENCH_SCRIPTS/tools/diffNODE $this_ref/NODE.001_01 NODE.001_01 | tee $this_out/$CONFIG_NAME.$this_method.diff
