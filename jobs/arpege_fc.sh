@@ -34,9 +34,12 @@ MFBENCH_FOO=2
 CONFIG_NAME=arpege_fc
 CONFIG_GRID=${MFBENCH_GRID:-tl0048}
 CONFIG_CYCLE=$(mfb cycle)
+CONFIG_XPSET=$CONFIG_CYCLE.$CONFIG_NAME.$CONFIG_GRID
 CONFIG_FLOAT=$(mfb float)
 CONFIG_PACK=${MFBENCH_PACK:-${CONFIG_CYCLE//cy/}_rapsmain.01.$MFBENCH_ARCH.$MFBENCH_OPTS}
-CONFIG_DATA=$MFBENCH_INPUTS/$CONFIG_CYCLE.$CONFIG_NAME.$CONFIG_GRID
+CONFIG_DATA=$MFBENCH_INPUTS/$CONFIG_XPSET
+CONFIG_OUTS=$MFBENCH_OUTPUTS/$CONFIG_XPSET
+CONFIG_REFS=$MFBENCH_REFERENCES/$CONFIG_XPSET
 CONFIG_CONST=$MFBENCH_INPUTS/$CONFIG_CYCLE.constants.expanded
 CONFIG_STOP=24
 CONFIG_TSTEP=auto
@@ -50,6 +53,7 @@ CONFIG_CATNODE=${MFBENCH_CATNODE:-no}
 # -----------------------------------------------------------------------------
 
 
+# -----------------------------------------------------------------------------
 # Model executable / number of nodes, tasks per node, threads per task
 MASTER_BIN=$MFBENCH_PACKS/$CONFIG_PACK/bin/MASTERODB
 MASTER_NODES=1
@@ -57,6 +61,7 @@ MASTER_TASKS=32
 MASTER_THREADS=2
 MASTER_NPROC=$((MASTER_NODES*MASTER_TASKS))
 
+# -----------------------------------------------------------------------------
 # I/O server executable / number of nodes, tasks per node
 IOSERVER_BIN=$MASTER_BIN
 IOSERVER_NODES=1
@@ -66,6 +71,7 @@ IOSERVER_NPROC=$((IOSERVER_NODES*IOSERVER_TASKS))
 
 set +ax
 
+# -----------------------------------------------------------------------------
 # Check some top level elements
 if [ ! -d $CONFIG_DATA ]; then
   echo "Initialisation data directory does not exists" >&2
@@ -84,11 +90,13 @@ if [ ! -f $IOSERVER_BIN ]; then
   exit 1
 fi
 
+# -----------------------------------------------------------------------------
 # Include env settings
 set -x
 source $MFBENCH_JOBS/include/env.drhook.$CONFIG_DRHOOK.sh
 source $MFBENCH_JOBS/include/env.meminfo.sh
 source $MFBENCH_JOBS/include/env.openmp.sh
+source $MFBENCH_JOBS/include/env.mkl.sh
 source $MFBENCH_JOBS/include/stack.clean.sh
 source $MFBENCH_JOBS/include/stack.$CONFIG_FLOAT.sh
 source $MFBENCH_JOBS/include/sys.misc.sh
@@ -99,6 +107,7 @@ if [ "$CONFIG_TSTEP" == "auto" ]; then
   echo "Set default time step to $CONFIG_TSTEP"
 fi
 
+# -----------------------------------------------------------------------------
 # Copy background namelists
 \cp $MFBENCH_NAMELISTS/$CONFIG_CYCLE.$CONFIG_NAME.nam fort.4
 \cp $MFBENCH_NAMELISTS/$CONFIG_CYCLE.$CONFIG_NAME.sfx EXSEG1.nam
@@ -106,7 +115,11 @@ fi
 # Setup parallel geometry and top level optimisations (see documentation)
 $MFBENCH_JOBS/include/namset.$CONFIG_NAME.sh
 
-# Import cioompilers wrapper (including mpirun)
+# Fix namelist according to processing unit (if needed)
+$MFBENCH_JOBS/include/fixnam.$MFBENCH_PCUNIT.sh
+
+# -----------------------------------------------------------------------------
+# Import compilers wrapper (including mpirun)
 set +x
 source $MFBENCH_SCRIPTS_WRAPPERS/export_compilers.sh
 set -x
@@ -146,17 +159,18 @@ for this_method in $CONFIG_METHODS; do
     -- --nn $IOSERVER_NODES --nnp $IOSERVER_TASKS --openmp $IOSERVER_THREADS -- $IOSERVER_BIN
 
   # Output directory
-  this_out=$MFBENCH_OUTPUTS/$(basename $CONFIG_DATA).$CONFIG_STAMP.$this_method
+  this_out=$MFBENCH_OUTS/$CONFIG_STAMP.$this_method
   \mkdir -p $this_out
   if [ -f NODE.001_01 ]; then
-    \cp NODE.001_01 $this_out/$CONFIG_NAME.$this_method.out
+    \cp NODE.001_01 $this_out/$CONFIG_NAME.$this_method.node.001
     [[ "$CONFIG_CATNODE" == "yes" ]] &&  cat NODE.001_01
   fi
 
   # Check the validity of scientific results
-  this_ref=$MFBENCH_REFERENCES/$(basename $CONFIG_DATA)
+  this_ref=$MFBENCH_REFS
   if [ -d $this_ref ]; then
-    $MFBENCH_SCRIPTS/tools/diffNODE $this_ref/$CONFIG_NAME.$this_method.out NODE.001_01 | tee $this_out/$CONFIG_NAME.$this_method.diff
+    echo "$this_ref/NODE.001_01" > $this_out/$CONFIG_NAME.$this_method.ref
+    $MFBENCH_SCRIPTS/tools/diffNODE $this_ref/NODE.001_01 NODE.001_01 | tee $this_out/$CONFIG_NAME.$this_method.diff
   else
     echo "Warning: could not find any reference for this configuration" >&2
   fi

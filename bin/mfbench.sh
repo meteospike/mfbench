@@ -35,7 +35,7 @@ while [[ $# -gt 0 ]]; do
 
   if [ "$mfb" == "help" ]; then
 
-    [[ $# -eq 0 ]] && set -- settings install compile inputs execution outputs
+    [[ $# -eq 0 ]] && set -- settings install compile execution
 
     while [[ $# -gt 0 ]]; do
 
@@ -100,21 +100,13 @@ while [[ $# -gt 0 ]]; do
         echo " + mfb clean                  : Clean and reset the current pack"
       fi
 
-      if [ "$chapter" = "inputs" ]; then
-        echo "-- INPUTS --------------------"
-        echo " + mfb inputs                 : List available input configurations"
-      fi
-
       if [ "$chapter" = "execution" ]; then
         echo "-- EXECUTION -----------------"
+        echo " + mfb inputs                 : List available input configurations"
         echo " + mfb play                   : Run the mfbench actual configuration"
-        echo " + mfb redo                   : Make and Play"
-      fi
-
-      if [ "$chapter" = "outputs" ]; then
-        echo "-- OUTPUTS -------------------"
         echo " + mfb outputs                : List actual outputs directories"
       fi
+
     done
 
   elif [ "$mfb" == "fake" ]; then
@@ -1075,10 +1067,6 @@ while [[ $# -gt 0 ]]; do
       # Should fix first a running environment and submit method
       exec ./$this_play.sh
     done
-
-  elif [ "$mfb" == "redo" ]; then
-
-    set -- compile play
 
   elif [ "$mfb" == "outputs" ]; then
 
