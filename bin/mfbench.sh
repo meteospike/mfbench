@@ -17,8 +17,8 @@
 #  % mfb off (possibly as a source shell)
 
 isnumber='^[0-9]+$'
-
-source $(dirname $(realpath $0))/utils.sh
+thiscallpath=$(dirname $(realpath $0))
+source $thiscallpath/utils.sh
 
 if [[ $# == 0 ]]; then
     set -- help
@@ -37,91 +37,31 @@ while [[ $# -gt 0 ]]; do
 
     [[ $# -eq 0 ]] && set -- settings install compile execution
 
-    while [[ $# -gt 0 ]]; do
-
-      chapter=${1,,}
-      shift
-
-      if [ "$chapter" = "settings" ]; then
-        echo "-- SETTINGS ------------------"
-        echo " + mfb version                : Display current mfbench version"
-        echo " + mfb init                   : Set up default environment"
-        echo " + mfb link [mfbdir] [srcdir] : Set up default environment"
-        echo " + mfb on                     : Activate a session"
-        echo " + mfb off                    : Turn off current session"
-        echo " + mfb root                   : Display current mfbench root directory"
-        echo " + mfb float                  : Display default float precision (single/double)"
-        echo " + mfb methods                : Display list of running methods according to pcunit"
-        echo " + mfb path                   : Display actual internal path"
-        echo " + mfb env                    : Display current mfbench environment"
-        echo " + mfb omp                    : Display current OpenMP environment"
-        echo " + mfb var [vars]             : Display specified env variables"
-        echo " + mfb get [vars]             : Get the actual value of the specified env variables"
-        echo " + mfb set [var] [value]      : Set the env variable to specified value"
-        echo " + mfb unset [vars]           : Unset the specified env variables"
-        echo " + mfb clone [new-name]       : Clone current profile to the one specified"
-        echo " + mfb switch [prof-name]     : Switch from current profile to the one specified"
-        echo " + mfb rmprof [prof-name]     : Delete the specified profile (sould not be active)"
-        echo " + mfb list [all|items]       : List any mfbench directory"
-      fi
-
-      if [ "$chapter" = "install" ]; then
-        echo "-- INSTALL -------------------"
-        echo " + mfb bundle [num]           : List available bundles and set default"
-        echo " + mfb bundle-auto            : Select a default bundle according to current mode"
-        echo " + mfb bundle-map             : Show items in the current bundle by type"
-        echo " + mfb bundle-list            : List all types in the current bundle in a raw"
-        echo " + mfb bundle-flat            : List all items in the current bundle in a raw"
-        echo " + mfb bundle-arch            : List all items in the current bundle with arch and pack options"
-        echo " + mfb bundle-item [item]     : Show parameters used for install purpose"
-        echo " + mfb sources [+-] [items]   : Display or set bench components"
-        echo " + mfb cmake                  : Check CMake path and version"
-        echo " + mfb fypp                   : Check Fypp path and version"
-        echo " + mfb perl                   : Check Perl path and version"
-        echo " + mfb yaml                   : Check Yaml module and version"
-        echo " + mfb check                  : Check all external tools versions"
-        echo " + mfb python                 : Check Python path and version and seaarch path for modules"
-        echo " + mfb installed              : List local install items"
-        echo " + mfb track [items]          : List local install files for items"
-      fi
-
-      if [ "$chapter" = "compile" ]; then
-        echo "-- COMPILE--------------------"
-        echo " + mfb gmkfile [num]          : List available gmkfiles and set default"
-        echo " + mfb gmkfile-auto           : Select a default gmkfile according to arch and opts"
-        echo " + mfb mkmain                 : Create a complete base pack including hub and main"
-        echo " + mfb mkpack                 : Create an incremental pack on top of a previous one"
-        echo " + mfb rmpack [pack]          : Remove specified pack or current pack"
-        echo " + mfb postpack               : Apply existing filters functions on ics/ild files"
-        echo " + mfb pack                   : Display the full path of the current pack"
-        echo " + mfb nest                   : Set the current directory as the current pack"
-        echo " + mfb compile                : Compile through ics files in the current pack"
-        echo " + mfb load                   : Link or re-link through ild files in the current pack"
-        echo " + mfb clean                  : Clean and reset the current pack"
-      fi
-
-      if [ "$chapter" = "execution" ]; then
-        echo "-- EXECUTION -----------------"
-        echo " + mfb inputs                 : List available input configurations"
-        echo " + mfb play                   : Run the mfbench actual configuration"
-        echo " + mfb outputs                : List actual outputs directories"
-      fi
-
-    done
+    set -- autodoc $*
 
   elif [ "$mfb" == "fake" ]; then
+    #:execution:fake: Do not complete a full execution of the command
 
     tempo_fake=true
 
+  elif [ "$mfb" == "autodoc" ]; then
+    #:settings:autodoc: Display help page for sections
+
+    exec $thiscallpath/autodoc.py $*
+    set --
+
   elif [ "$mfb" == "version" ]; then
+    #:settings:version: Display mfbench version
 
     echo "This is mfbench $(cat $MFBENCH_ROOT/VERSION) at $MFBENCH_ROOT"
 
   elif [ "$mfb" == "linkable" ]; then
+    #:settings:linkable: List of candidate directories to external linking
 
     cut -d ":" -f 1 $(dirname $(realpath $0))/../conf/mfbench-optlink
 
   elif [ "$mfb" == "init" ]; then
+    #:settings:init: Set up default environment
 
     [[ -f ../bin/mfbench.sh && -d ../jobs ]] && \cd ..
 
@@ -236,6 +176,7 @@ while [[ $# -gt 0 ]]; do
     set -- setenv $*
 
   elif [ "$mfb" == "link" ]; then
+    #:settings:link [mfbdir] [srcdir]: Set external link directory"
 
     if [ $# -ne 2 ]; then
       echo "Usage: mfb link mfbench-dir source-dir"
@@ -254,8 +195,7 @@ while [[ $# -gt 0 ]]; do
     fi
 
   elif [ "$mfb" == "setenv" ]; then
-
-    echo "Freezing mfbench environment"
+    #:settings:setenv: Freeze current environment
 
     unset $(env | fgrep MFBENCH_FUNCTIONS_ | cut -d "=" -f1)
 
@@ -263,6 +203,7 @@ while [[ $# -gt 0 ]]; do
     env | fgrep OMP_     | sort -u > $MFBENCH_PROFDIR/env.omp
 
   elif [ "$mfb" == "on" ]; then
+    #:settings:on: Activate current profile environment
 
     if [ "$MFBENCH_ROOT" == "" ]; then
       if [ -f $HOME/.mfb_root ]; then
@@ -303,6 +244,7 @@ while [[ $# -gt 0 ]]; do
     fi
 
   elif [ "$mfb" == "off" ]; then
+    #:settings:off: Turn off current profile environment
 
     set -a; source $MFBENCH_PROFDIR/restore.profile; set +a
 
@@ -311,11 +253,13 @@ while [[ $# -gt 0 ]]; do
     done
 
   elif [ "$mfb" == "root" ]; then
+    #:settings:off: Prompt mfbench root directory
 
     \cd $MFBENCH_ROOT
     pwd
 
   elif [ "$mfb" == "profiles" ]; then
+    #:settings:off: List defined profiles with main parameters
 
     \cd $MFBENCH_STORE
     for this_prof in $(\ls -1d profile_* | cut -d "_" -f 2 | sort -u); do
@@ -323,6 +267,7 @@ while [[ $# -gt 0 ]]; do
     done
 
   elif [ "$mfb" == "clone" ]; then
+    #:settings:clone [prof-name]: Clone current profile to [prof-name]
 
     if [ $# -ne 1 ]; then
       echo "Usage: mfb $mfb new-profile-name" >&2
@@ -347,6 +292,7 @@ while [[ $# -gt 0 ]]; do
     set -- setenv
 
   elif [ "$mfb" == "switch" ]; then
+    #:settings:switch [prof-name]: Switch to profile [prof-name]
 
     if [ $# -ne 1 ]; then
       echo "Usage: mfb $mfb new-profile-name" >&2
@@ -369,6 +315,7 @@ while [[ $# -gt 0 ]]; do
     set --
 
   elif [ "$mfb" == "rmprof" ]; then
+    #:settings:rmprof [prof-name]: Remove profile [prof-name]
 
     if [ $# -ne 1 ]; then
       echo "Usage: mfb $mfb new-profile-name" >&2
@@ -398,16 +345,19 @@ while [[ $# -gt 0 ]]; do
     done
 
   elif [ "$mfb" == "methods" ]; then
+    #:execution:methods: Display default execution methods
 
     echo ${MFBENCH_METHODS:-$(cat $MFBENCH_CONF/mfbench-methods-$MFBENCH_PCUNIT)}
 
   elif [ "$mfb" == "profdir" ]; then
+    #:settings:profdir: Display current profile contents
 
-      \cd $MFBENCH_PROFDIR
-      pwd
-      \ls -l
+    \cd $MFBENCH_PROFDIR
+    pwd
+    \ls -l
 
   elif [ "$mfb" == "cycle" ]; then
+    #:settings:cycle: Display current default cycle
 
     this_cycle=${MFBENCH_CYCLE:-$(cat $MFBENCH_CONF/gmkpack-cycle)}
     this_cycle=${this_cycle,,}
@@ -415,19 +365,23 @@ while [[ $# -gt 0 ]]; do
     echo "cy$this_cycle"
 
   elif [ "$mfb" == "float" ]; then
+    #:settings:float: Display floating point precision
 
     this_float=${MFBENCH_FLOAT:-$(cat $MFBENCH_CONF/gmkpack-float)}
     echo "${this_float,,}"
 
   elif [ "$mfb" == "path" ]; then
+    #:settings:path: Display current PATH value
 
     echo "PATH=$PATH"
 
   elif [ "$mfb" == "env" ]; then
+    #:settings:env: Display MFBENCH environment variables
 
     env | fgrep MFBENCH_ | fgrep -v MFBENCH_OP_ | sort
 
   elif [ "$mfb" == "var" ]; then
+    #:settings:var: Display specified MFBENCH environment variables
 
     while [[ $# -gt 0 ]]; do
       varname="MFBENCH_${1^^}"
@@ -441,6 +395,7 @@ while [[ $# -gt 0 ]]; do
     done
 
   elif [ "$mfb" == "get" ]; then
+    #:settings:get: Retrieve specified MFBENCH environment variables values
 
     while [[ $# -gt 0 ]]; do
       varname="MFBENCH_${1^^}"
@@ -451,6 +406,7 @@ while [[ $# -gt 0 ]]; do
     done
 
   elif [ "$mfb" == "set" ]; then
+    #:settings:set [varname] [value]: Set specified MFBENCH environment variable to value
 
     if [[ $# -lt 2 ]]; then
       echo "Usage: mfb set varname value" >&2
@@ -467,6 +423,7 @@ while [[ $# -gt 0 ]]; do
     set -- setenv
 
   elif [ "$mfb" == "unset" ]; then
+    #:settings:unset: Unset specified MFBENCH environment variables
 
     tempo_envupd=0
     while [[ $# -gt 0 ]]; do
@@ -484,14 +441,17 @@ while [[ $# -gt 0 ]]; do
     [[ $tempo_envupd -eq 1 ]] && set -- setenv
 
   elif [ "$mfb" == "omp" ]; then
+    #:settings:omp: Display OpenMP environment variables
 
     env | fgrep -e OMP_ -e KMP_ | sort
 
   elif [ "$mfb" == "gmk" ]; then
+    #:compile:gmk: Display gmkpack environment variables
 
     env | fgrep -e GMK -e HOMEPACK -e ROOTPACK -e HOMEBIN -e ROOTBIN | sort
 
   elif [ "$mfb" == "gmkfile" ]; then
+    #:compile:gmkfile [num]: List or select a gmkfile in position [num]
 
     [[ "$MFBENCH_FUNCTIONS_DIRECTORIES" != "true" ]] && source $MFBENCH_SCRIPTS_FUNCTIONS/directories.sh
 
@@ -503,6 +463,7 @@ while [[ $# -gt 0 ]]; do
     mfbench_listdir_def conf/gmkfile $inum
 
   elif [ "$mfb" == "gmkfile-auto" ]; then
+    #:compile:gmkfile-auto: Automaticaly select a gmkfile according to ARCH and OPTS
 
     \cd $MFBENCH_CONF
     \rm -f GMKFILE-SELECT.$MFBENCH_PROFILE
@@ -510,6 +471,7 @@ while [[ $# -gt 0 ]]; do
     \ln -s gmkfile-$MFBENCH_ARCH.$MFBENCH_OPTS GMKFILE-SELECT.$MFBENCH_PROFILE
 
   elif [ "$mfb" == "sources" ]; then
+    #:install:sources [+- tarfile]:List, add or delete from sources directory
 
     if [[ $# -ge 2 && ( "$1" == "+" || "$1" == "-" ) ]]; then
       if [ "$1" == "+" ]; then
@@ -538,6 +500,7 @@ while [[ $# -gt 0 ]]; do
     fi
 
   elif [ "$mfb" == "list" ]; then
+    #:settings:list [items]: Ordered list of directories contents
 
     [[ "$MFBENCH_FUNCTIONS_DIRECTORIES" != "true" ]] && source $MFBENCH_SCRIPTS_FUNCTIONS/directories.sh
 
@@ -561,6 +524,7 @@ while [[ $# -gt 0 ]]; do
     done
 
   elif [ "$mfb" == "fypp" ]; then
+    #:install:fypp: Check current Fypp version
 
     fypp_command=$(which fypp 2>/dev/null)
     if [ $? == 0 ]; then
@@ -571,6 +535,7 @@ while [[ $# -gt 0 ]]; do
     fi
 
   elif [ "$mfb" == "cmake" ]; then
+    #:install:cmake: Check current CMake version
 
     cmake_version=$(cmake --version | head -1 | cut -d " " -f3)
     echo "$(which cmake) is $cmake_version"
@@ -579,6 +544,7 @@ while [[ $# -gt 0 ]]; do
     fi
 
   elif [ "$mfb" == "perl" ]; then
+    #:install:perl: Check current Perl version
 
     perl_version=$(perl -we 'print substr($^V,1);')
     echo "$(which perl) is $perl_version"
@@ -587,6 +553,7 @@ while [[ $# -gt 0 ]]; do
     fi
 
   elif [ "$mfb" == "yaml" ]; then
+    #:install:yaml: Check current YAML version
 
     yaml_version=$(python3 -c "import yaml; print(yaml.__version__)" 2>/dev/null)
     if [ $? == 0 ]; then
@@ -597,36 +564,44 @@ while [[ $# -gt 0 ]]; do
     fi
 
   elif [ "$mfb" == "python" ]; then
+    #:install:python: Check current Python version
 
     python_version=$(python3 --version | cut -d " " -f2)
     echo "$(which python3) is $python_version"
     echo "PYTHONPATH=$PYTHONPATH"
 
   elif [ "$mfb" == "check" ]; then
+    #:install:check: Check version of all external tools
 
-    set -- cmake fypp perl yaml $*
+    set -- cmake fypp perl yaml python $*
 
   elif [ "$mfb" == "bundle-list" ]; then
+    #:install:bundle-list: Display the list of all bundle families
 
     exec bundle.py --list
 
   elif [ "$mfb" == "bundle-flat" ]; then
+    #:install:bundle-flat: Display a flat list of all bundle items
 
     exec bundle.py --flat
 
   elif [ "$mfb" == "bundle-arch" ]; then
+    #:install:bundle-arch: Display a list of all bundle items with arch and pack options
 
     exec bundle.py --arch | sort -u
 
   elif [ "$mfb" == "bundle-map" ]; then
+    #:install:bundle-map: Display all defined bundle items per families
 
     exec bundle.py --cmap
 
   elif [ "$mfb" == "bundle-item" ]; then
+    #:install:bundle-item [item]: Display install variables for a bundle item
 
     exec bundle.py --item $1
 
   elif [ "$mfb" == "bundle" ]; then
+    #:install:bundle [num]: List or select a bundle file in position [num]
 
     [[ "$MFBENCH_FUNCTIONS_DIRECTORIES" != "true" ]] && source $MFBENCH_SCRIPTS_FUNCTIONS/directories.sh
 
@@ -638,6 +613,7 @@ while [[ $# -gt 0 ]]; do
     mfbench_listdir_def conf/bundle $inum
 
   elif [ "$mfb" == "bundle-auto" ]; then
+    #:installl:bundle-auto: Automaticaly select a bundle file according to PCUNIT
 
     \cd $MFBENCH_CONF
     \rm -f BUNDLE-SELECT.$MFBENCH_PROFILE
@@ -757,19 +733,23 @@ while [[ $# -gt 0 ]]; do
     done
 
   elif [ "$mfb" == "install" ]; then
+     #:install:install [items]: Install specified items
 
     set -- process install $*
 
   elif [ "$mfb" == "uninstall" ]; then
+    #:install:uninstall [items]: Uninstall specified items
 
     set -- process uninstall $*
 
   elif [ "$mfb" == "installed" ]; then
+    #:install:installed: List installed items
 
     \cd $MFBENCH_TRACKDIR
     \ls -1 track.*.shared track.*.$MFBENCH_ARCH 2>/dev/null | sort -u | cut -f2 -d "."
 
   elif [ "$mfb" == "track" ]; then
+    #:install:track [items]: List local installed files for [items]
 
     for this_file in $*; do
       this_item=${this_file//-/_}
@@ -784,6 +764,7 @@ while [[ $# -gt 0 ]]; do
     set --
 
   elif [ "$mfb" == "pack" ]; then
+    #:compile:pack: Display active pack
 
     mandatory_var_msg "'$mfb'" packs
 
@@ -805,6 +786,7 @@ while [[ $# -gt 0 ]]; do
     fi
 
   elif [ "$mfb" == "nest" ]; then
+    #:compile:nest: Set the current pack as default one
 
     mandatory_var_msg "'$mfb'" packs
 
@@ -828,6 +810,7 @@ while [[ $# -gt 0 ]]; do
     set -- setenv
 
   elif [ "$mfb" == "mkmain" ]; then
+    #:compile:mkmain [branch] [id]: Build a ground pack with optional settings
 
     mandatory_var_msg "'$mfb'" packs arch opts
 
@@ -880,6 +863,7 @@ while [[ $# -gt 0 ]]; do
     fi
 
   elif [ "$mfb" == "mkpack" ]; then
+    #:compile:mkpack [branch] [id]: Build a derivated pack with optional settings
 
     mandatory_var_msg "'$mfb'" arch opts packs mainpack
 
@@ -942,6 +926,7 @@ while [[ $# -gt 0 ]]; do
     set -- setenv postpack
 
   elif [ "$mfb" == "postpack" ]; then
+    #:compile:postpack: Rerun methods called after pack creation (mostly internal)
 
     mandatory_var_raw packs pack conf
 
@@ -953,7 +938,8 @@ while [[ $# -gt 0 ]]; do
       $compile_func
     done
 
-  elif [ "$mfb" == "rmpack" ]; then
+  elif [ "$mfb" == "rmpack [packs]" ]; then
+    #:compile:rmpack [pack]: Remove specified [pack]
 
     mandatory_var_raw packs
 
@@ -979,6 +965,7 @@ while [[ $# -gt 0 ]]; do
     set -- setenv
 
   elif [ "$mfb" == "compilers" ]; then
+    #:compile:compilers: Display and export compilers wrappers
 
     source $MFBENCH_SCRIPTS_WRAPPERS/export_compilers.sh
 
@@ -1027,16 +1014,19 @@ while [[ $# -gt 0 ]]; do
     fi
 
   elif [ "$mfb" == "compile" ]; then
+    #:compile:compile [ics]: Compile through all or specified ics files in the current pack
 
     tempo_private=true
     set -- build ics $*
 
   elif [ "$mfb" == "load" ]; then
+    #:compile:load [ild]: Load through all or specified ild files in the current pack
 
     tempo_private=true
     set -- build ild $*
 
   elif [ "$mfb" == "clean" ]; then
+   #:compile:clean: Clean current pack
 
     mandatory_var_raw packs pack
     \cd $MFBENCH_PACKS/$MFBENCH_PACK
@@ -1044,18 +1034,22 @@ while [[ $# -gt 0 ]]; do
     resetpack
 
   elif [ "$mfb" == "stamp" ]; then
+    #:settings:stamp: Get a time stamp
 
     echo $(date '+D%Y%m%d_T%H%M%S')$(date '+%N' | cut -c 1-2)
 
   elif [ "$mfb" == "inputs" ]; then
+    #:execution:inputs: Ordered list of input sets
 
     set -- list inputs $*
 
   elif [ "$mfb" == "namelists" ]; then
+    #:execution:namelists: Ordered list of namelists
 
     set -- list namelists $*
 
   elif [ "$mfb" == "play" ]; then
+    #:execution:play [jobs]: Execute specified [jobs] in the current environment
 
     \cd $MFBENCH_JOBS
 
@@ -1069,15 +1063,18 @@ while [[ $# -gt 0 ]]; do
     done
 
   elif [ "$mfb" == "outputs" ]; then
+    #:execution:outputs: Ordered list of output sets
 
     set -- list outputs $*
 
   elif [ "$mfb" == "tube" ]; then
+    #:execution:tube: Execute shell commands through the MFBENCH settings
 
     exec $*
     set --
 
   elif [ "$mfb" == "mkrundir" ]; then
+    #:execution:mkrundir: Create an execution directory
 
     export MFBENCH_RUNDIR=$MFBENCH_TMPDIR/$(basename $(mktemp -u))
     [[ ! -d $MFBENCH_RUNDIR ]] && \mkdir -p $MFBENCH_RUNDIR
