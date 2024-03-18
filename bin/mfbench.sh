@@ -113,7 +113,7 @@ while [[ $# -gt 0 ]]; do
     export MFBENCH_TMPDIR=${MFBENCH_TMPDIR:-$HOME/tmp}
     mfbench_mkdir tmpdir
 
-    export WORKDIR=${WORKDIR:-$MFBENCH_TMPDIR}
+    WORKDIR=${WORKDIR:-$MFBENCH_TMPDIR}
     export MFBENCH_WORKDIR=${MFBENCH_WORKDIR:-$WORKDIR/mfbench}
     mfbench_mkdir workdir
 
@@ -1073,13 +1073,10 @@ while [[ $# -gt 0 ]]; do
     exec $*
     set --
 
-  elif [ "$mfb" == "mkrundir" ]; then
-    #:execution:mkrundir: Create an execution directory
+  elif [ "$mfb" == "rundir" ]; then
+    #:execution:rundir: Build an unique pathname for execution directory
 
-    export MFBENCH_RUNDIR=$MFBENCH_TMPDIR/$(basename $(mktemp -u))
-    [[ ! -d $MFBENCH_RUNDIR ]] && \mkdir -p $MFBENCH_RUNDIR
-    echo $MFBENCH_RUNDIR
-    set -- setenv
+    echo $MFBENCH_TMPDIR/$(basename $(mktemp -u -t mfb-rundir-XXXXXX))
 
   else
 

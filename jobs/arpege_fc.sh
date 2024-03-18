@@ -16,14 +16,8 @@
 # Select your profile
 mfb switch gputest
 
-# Get the actual rundir (either from $TMPDIR var or by construct)
-mfb mkrundir
-
 # Load and display current mfb profile variables
 . mfb env
-
-# Move to current running directory
-\cd $MFBENCH_RUNDIR
 
 set -aex
 
@@ -52,8 +46,7 @@ CONFIG_METHODS=$(mfb methods)
 CONFIG_STAMP=$(mfb stamp)
 CONFIG_PROCINFO=off
 CONFIG_CATNODE=${MFBENCH_CATNODE:-no}
-# -----------------------------------------------------------------------------
-
+CONFIG_RUNDIR=$(mfb rundir)
 
 # -----------------------------------------------------------------------------
 # Model executable / number of nodes, tasks per node, threads per task
@@ -72,6 +65,11 @@ IOSERVER_THREADS=1
 IOSERVER_NPROC=$((IOSERVER_NODES*IOSERVER_TASKS))
 
 set +ax
+
+# -----------------------------------------------------------------------------
+# Move to current running directory
+\mkdir -p $CONFIG_RUNDIR
+\cd $CONFIG_RUNDIR
 
 # -----------------------------------------------------------------------------
 # Check some top level elements
@@ -131,8 +129,8 @@ set -x
 
 for this_method in $CONFIG_METHODS; do
 
-  \mkdir -p $MFBENCH_RUNDIR/$this_method
-  \cd $MFBENCH_RUNDIR/$this_method
+  \mkdir -p $CONFIG_RUNDIR/$this_method
+  \cd $CONFIG_RUNDIR/$this_method
 
   # Setting env variables related to this local path
   export ECCODES_SAMPLES_PATH=$PWD/eccodes/ifs_samples/grib1_mlgrib2
@@ -193,7 +191,7 @@ for this_method in $CONFIG_METHODS; do
 done
 
 # Intra comparaisons
-\cd $MFBENCH_RUNDIR
+\cd $CONFIG_RUNDIR
 
 for this_cmp in $(< $MFBENCH_CONF/mfbench-methods-cmp); do
   diff1=$(echo $this_cmp | cut -d ":" -f1)
