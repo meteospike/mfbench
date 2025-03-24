@@ -149,7 +149,7 @@ while [[ $# -gt 0 ]]; do
     mfbench_mkdir_ln references $MFBENCH_DATA
 
     if [ -f $MFBENCH_ROOT/VERSION ]; then
-      export MFBENCH_XPID=v$(cat $MFBENCH_ROOT/VERSION)
+      export MFBENCH_XPID=$(cat $MFBENCH_ROOT/VERSION)
     else
       export MFBENCH_XPID=test
     fi

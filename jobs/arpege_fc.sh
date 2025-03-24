@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name=arp
-#SBATCH --partition=ndl
-## #SBATCH --partition=normal256
+#SBATCH --partition=normal256
+## #SBATCH --partition=ndl
 #SBATCH --export=NONE
 #SBATCH --time=00:05:00
 #SBATCH --mem=247000
@@ -9,12 +9,12 @@
 #SBATCH --verbose
 #SBATCH --no-requeue
 #SBATCH --nodes=1
-#SBATCH --gres=gpu:4
+## SBATCH --gres=gpu:4
 ## #SBATCH --ntasks-per-node=32
 ## #SBATCH --cpus-per-task=2
 
 # Select your profile
-mfb switch gputest
+mfb switch default
 
 # Load and display current mfb profile variables
 . mfb env
@@ -69,6 +69,10 @@ set +ax
 # -----------------------------------------------------------------------------
 # Move to current running directory
 \mkdir -p $CONFIG_RUNDIR
+if [ $? -ne 0 ]; then
+  echo "Could not create rundir: $CONFIG_RUNDIR" >&2
+  exit 1
+fi
 \cd $CONFIG_RUNDIR
 
 # -----------------------------------------------------------------------------
@@ -162,7 +166,7 @@ for this_method in $CONFIG_METHODS; do
   # Run
   \ls -lrt
   $MFBENCH_COMPILER_MPIRUN \
-       --nn $MASTER_NODES   --nnp $MASTER_TASKS   --openmp $MASTER_THREADS  -- $MASTER_BIN \
+       --nn $MASTER_NODES   --nnp $MASTER_TASKS   --openmp $MASTER_THREADS   -- $MASTER_BIN \
     -- --nn $IOSERVER_NODES --nnp $IOSERVER_TASKS --openmp $IOSERVER_THREADS -- $IOSERVER_BIN
 
   # Save node output

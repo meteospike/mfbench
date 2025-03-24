@@ -102,6 +102,7 @@ sub clean {
   $dirtynam =~ s/\s*[,]?\s*$//gimos;
   $dirtynam =~ s/\(\s+/\(/gimos;
   $dirtynam =~ s/\s+\)/\)/gimos;
+  $dirtynam =~ s/^([^=]+\S)\s*=\s*/$1=/gimos;
 
   return ( split /\n/, $dirtynam );
 }
