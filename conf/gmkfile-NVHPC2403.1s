@@ -45,7 +45,7 @@ GMK_FYPP_FLAGS = -M $MFBENCH_INSTALL/tools/yaml/lib -m os -m yaml
 # Fortran compiler default version (stamp)
 # ----------------------------------------
 
-LIBFRT = echo NVHPC2401
+LIBFRT = echo NVHPC2403
 
 # Basic compilation flags
 # -----------------------
