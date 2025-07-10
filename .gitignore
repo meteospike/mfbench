@@ -7,6 +7,7 @@ data/references
 install/
 packs/
 sources/
+support/arch/conf/
 support/arch/gmkfile-*
 *.out
 *.dbug
